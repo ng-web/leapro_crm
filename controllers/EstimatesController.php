@@ -92,6 +92,52 @@ class EstimatesController extends Controller
         ]);
     }
 
+     public function actionSchedules()
+    {
+        $unschedules = \Yii::$app->db->createCommand("SELECT company_name as `name`, es.estimate_id FROM customers cu inner join companies on companies.customer_id = cu.customer_id  inner JOIN company_locations on company_locations.company_id = companies.company_id
+                                                      inner JOIN areas a on a.company_location_id = company_locations.company_location_id 
+                                                      inner JOIN estimated_areas ea on ea.area_id = a.area_id inner join estimates es on 
+                                                      ea.estimate_id = es.estimate_id where es.status_id = 3 and es.schedule_date_time is null union select concat(c.customer_firstname,' ',c.customer_lastname) as `name`, 
+                                                      et.estimate_id from customers c inner join areas ar on ar.customer_id = c.customer_id inner join 
+                                                      estimated_areas ae on ae.area_id = ar.area_id inner join estimates et on et.estimate_id = ae.estimate_id
+                                                      where et.status_id = 3 and et.schedule_date_time is null")->queryAll();
+        $results =  \Yii::$app->db->createCommand("SELECT company_name as `name`, es.estimate_id, schedule_date_time, schedule_end_date FROM customers cu inner join companies on companies.customer_id = cu.customer_id  inner JOIN company_locations on company_locations.company_id = companies.company_id
+                                                      inner JOIN areas a on a.company_location_id = company_locations.company_location_id 
+                                                      inner JOIN estimated_areas ea on ea.area_id = a.area_id inner join estimates es on 
+                                                      ea.estimate_id = es.estimate_id where es.status_id = 3 and es.schedule_date_time is not null union select concat(c.customer_firstname,' ',c.customer_lastname) as `name`, 
+                                                      et.estimate_id, schedule_date_time, schedule_end_date from customers c inner join areas ar on ar.customer_id = c.customer_id inner join 
+                                                      estimated_areas ae on ae.area_id = ar.area_id inner join estimates et on et.estimate_id = ae.estimate_id
+                                                      where et.status_id = 3 and et.schedule_date_time is not null")->queryAll();
+
+        
+        $schedules = array();
+
+         foreach($results as $i => $e ){
+            $Event = new \yii2fullcalendar\models\Event();
+            $Event->id = $e['estimate_id'];
+            $Event->title = $e['name'];
+            $Event->start = date('Y-m-d\TH:i:s\Z',strtotime($e['schedule_date_time']));
+            $Event->end = date('Y-m-d\TH:i:s\Z',strtotime($e['schedule_end_date']));
+            $Event->startEditable = true;
+            $Event->durationEditable = true;
+            $Event->color = 'red';
+            $Event->url = 'index.php?r=estimates/preview&id='.$e['estimate_id'];
+            $schedules[$i] = $Event;
+
+        } 
+       //var_dump($schedules);die();
+        return $this->render('schedules', [
+            'unschedules'=>$unschedules,
+            'schedules'=>$schedules,
+        ]);
+    }
+
+    public function actionSetSchedule($id, $startDate, $endDate)
+    {
+         \Yii::$app->db->createCommand("UPDATE estimates SET schedule_date_time=:date_time, schedule_end_date=:endDate WHERE estimate_id=:id")
+          ->bindValues([':date_time'=> $startDate, ':endDate'=>$endDate, ':id'=>$id])
+          ->execute();
+    }
     /**
      * Creates a new Estimates model.
      * If creation is successful, the browser will be redirected to the 'view' page.
@@ -102,7 +148,7 @@ class EstimatesController extends Controller
     {
 
        $estimates = Estimates::FindEstimateSql($id);
-     
+      // var_dump($estimates); die();
         return  $this->render('preview', [
             'id' => $id,
             'estimates' => $estimates,
@@ -205,80 +251,25 @@ class EstimatesController extends Controller
     {
         $model = $this->findModel($id);
         
-        $serviceEstimates = ServiceEstimates::findAll(['estimate_id' => $id]);
-        $serviceEstimates = (empty($serviceEstimates)) ? [new ServiceEstimates] : $serviceEstimates;
 
-        $estimatedAreas =  EstimatedAreas::findAll(['estimate_id' => $id]);
-        $estimatedAreas = (empty($estimatedAreas)) ? [new EstimatedAreas] : $estimatedAreas;
+        $productUsedPerAreas[][] = [new ProductsUsedPerArea()];
+        $customer = Customers::findOne($custId);
+
+         $productServices = DynamicForms::createMultiple(ProductServices::classname());
+         DynamicForms::loadMultiple($productServices, Yii::$app->request->post());
+
         
-        foreach ($estimatedAreas as $i => $estimatedArea) {
-            $oldLoads = ProductsUsedPerArea::findAll(['estimated_area_id' => $estimatedArea->estimated_area_id]);
-            $productUsedPerAreas[$i] = $oldLoads;
-            $productUsedPerAreas[$i] = (empty($productUsedPerAreas[$i])) ? [new ProductsUsedPerArea] : $productUsedPerAreas[$i];
-        }
+         for ($i=0; $i<count($productServices); $i++) {
+              $loadsData['EstimatedAreas'] =  Yii::$app->request->post()['EstimatedAreas'][$i];
+              $estimatedAreas[$i] = DynamicForms::createMultiple(EstimatedAreas::classname(),[] ,$loadsData);
+              DynamicForms::loadMultiple($estimatedAreas[$i], $loadsData);
+              for($x=0; $x < count($estimatedAreas[$i]); $x++){
+                  $loadsData['ProductsUsedPerArea'] =  Yii::$app->request->post()['ProductsUsedPerArea'][$i][$x];
+                  $productUsedPerAreas[$i][$x] = DynamicForms::createMultiple(ProductsUsedPerArea::classname(),[] ,$loadsData);
+                  DynamicForms::loadMultiple($productUsedPerAreas[$i][$x] , $loadsData);
+              }
         
-        if ($model->load(Yii::$app->request->post())) {
-            
-            $estimatedAreas = DynamicForms::createMultiple(EstimatedAreas::classname());
-            DynamicForms::loadMultiple($estimatedAreas, Yii::$app->request->post());
-            
-            $serviceEstimates = DynamicForms::createMultiple(ServiceEstimates::classname());
-            DynamicForms::loadMultiple($serviceEstimates, Yii::$app->request->post());
-
-            $loadsData['_csrf'] =  Yii::$app->request->post()['_csrf'];
-            for ($i=0; $i<count($estimatedAreas); $i++) {
-                $loadsData['ProductsUsedPerArea'] =  Yii::$app->request->post()['ProductsUsedPerArea'][$i];
-                $productUsedPerAreas[$i] = DynamicForms::createMultiple(ProductsUsedPerArea::classname(),[] ,$loadsData);
-                DynamicForms::loadMultiple($productUsedPerAreas[$i], $loadsData);
-            }
-               
-
-            // validate all models
-            $valid = $model->validate();
-            //$valid = Model::validateMultiple($estimatedAreas) &&  Model::validateMultiple($productUsedPerAreas) && $valid;
-
-         if ($valid) {
-                $transaction = \Yii::$app->db->beginTransaction();
-                try {
-                     \Yii::$app->db->createCommand()->delete('service_estimates', ['estimate_id' => $id])->execute();
-                     \Yii::$app->db->createCommand()->delete('estimated_areas', ['estimate_id' => $id])->execute();
-                      
-                    if ($flag = $model->save(false)) {
-                        foreach ($estimatedAreas as $i => $estimatedArea) {
-                            $estimatedArea->estimate_id = $model->estimate_id;
-                            if (! ($flag = $estimatedArea->save(false))) {
-                                $transaction->rollBack();
-                                break;
-                            }
-                            else{
-                                 foreach ($productUsedPerAreas[$i] as $x => $productUsedPerArea) {
-                                    $productUsedPerArea->estimated_area_id = $estimatedArea->estimated_area_id;
-                                    if (! ($flag = $productUsedPerArea->save(false))) {
-                                        $transaction->rollBack();
-                                        break;
-                                    }
-                                    
-                                }
-                            }
-                        }
-                        foreach ($serviceEstimates as $i => $serviceEstimate) {
-                            $serviceEstimate->estimate_id = $model->estimate_id;
-                            if (! ($flag = $serviceEstimate->save(false))) {
-                                $transaction->rollBack();
-                                break;
-                            }
-                        }
-                    }
-                    if ($flag) {
-                        $transaction->commit();
-                        return $this->redirect(['preview']);
-                    }
-                } catch (Exception $e) {
-                    $transaction->rollBack();
-                }
-            }
-        }
-        else{
+         }
             $custId = Estimates::FindCustomerId($id);
             $customer = Customers::findOne($custId);
            
@@ -290,7 +281,7 @@ class EstimatesController extends Controller
                 'productUsedPerAreas' => (empty($productUsedPerAreas)) ? [new ProductsUsedPerArea] : $productUsedPerAreas,
             
             ]);
-       }
+       
     }
 
     

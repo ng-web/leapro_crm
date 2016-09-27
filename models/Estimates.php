@@ -53,6 +53,10 @@ class Estimates extends \yii\db\ActiveRecord
         return $this->hasMany(EstimatedAreas::className(), ['estimate_id' => 'estimate_id']);
     }
 
+public function getSchedules()
+    {
+        return $this->hasMany(Schedules::className(), ['estimate_id' => 'estimate_id']);
+    }
 
     public static function CountEstimates($id)
     {
@@ -76,6 +80,14 @@ class Estimates extends \yii\db\ActiveRecord
          inner JOIN products_used_per_area pa on pa.estimated_area_id = 
          ea.estimated_area_id inner JOIN products p on p.product_id = pa.product_id inner join product_services ps on p.product_id = ps.product_id 
          inner join services s on s.service_id = ps.service_id where es.estimate_id = :id
+         and s.service_id = :ser_id and a.area_id = :a_id group by  area_name, product_name
+         union
+         SELECT Distinct p.product_name, p.product_description, pa.product_cost_at_time, pa.quantity, a.area_name FROM 
+        customers         inner JOIN areas a on a.customer_id = customers.customer_id inner JOIN 
+         estimated_areas ea on ea.area_id = a.area_id inner join estimates es on ea.estimate_id = es.estimate_id
+         inner JOIN products_used_per_area pa on pa.estimated_area_id = 
+         ea.estimated_area_id inner JOIN products p on p.product_id = pa.product_id inner join product_services ps on p.product_id = ps.product_id 
+         inner join services s on s.service_id = ps.service_id where es.estimate_id = :id
          and s.service_id = :ser_id and a.area_id = :a_id group by  area_name, product_name')
          ->bindValues([':id'=>$id, ':ser_id'=>$ser_id,':a_id'=>$area_id])->queryAll();;
 
@@ -92,7 +104,16 @@ class Estimates extends \yii\db\ActiveRecord
          ea.estimated_area_id inner JOIN products p on p.product_id = pa.product_id
           inner join product_services ps on p.product_id = ps.product_id inner join services s 
           on s.service_id = ps.service_id where es.estimate_id = :id
-         and s.service_id = :ser_id')
+         and s.service_id = :ser_id
+         union
+         SELECT Distinct a.area_name, a.area_id FROM 
+         estimated_areas ea inner join areas a on ea.area_id = a.area_id inner join estimates es on ea.estimate_id = es.estimate_id
+         inner JOIN products_used_per_area pa on pa.estimated_area_id = 
+         ea.estimated_area_id inner JOIN products p on p.product_id = pa.product_id
+          inner join product_services ps on p.product_id = ps.product_id inner join services s 
+          on s.service_id = ps.service_id where es.estimate_id = :id
+         and s.service_id = :ser_id
+         ')
          ->bindValues([':id'=>$id, ':ser_id'=>$ser_id ])->queryAll();
 
         return $areas;
@@ -100,14 +121,21 @@ class Estimates extends \yii\db\ActiveRecord
 
     public static function FindEstimateSql($id)
     {
-        $FindEstimateSql = Yii::$app->db->createCommand('SELECT customers.customer_firstname, 
-            customers.customer_lastname, customers.customer_type,es.status_id, es.expiry_date, tax, a.area_name, ea.estimate_id, company_name, 
+        $FindEstimateSql = Yii::$app->db->createCommand('SELECT company_name as `name`, customers.customer_type,es.status_id, es.expiry_date, tax, a.area_name, ea.estimate_id, 
             es.received_date, address_line1, address_line2, address_province FROM companies left JOIN 
             company_locations on company_locations.company_id = companies.company_id left JOIN customers on 
             customers.customer_id = companies.customer_id left JOIN areas a on a.company_location_id = 
             company_locations.company_location_id left JOIN estimated_areas ea on ea.area_id = a.area_id 
             left join estimates es on ea.estimate_id = es.estimate_id left JOIN addresses on 
             company_locations.address_id = addresses.address_id left JOIN estimate_status s on
+             s.status_id = es.status_id where es.estimate_id = :id
+            union             
+            SELECT concat(customers.customer_firstname," ", customers.customer_lastname) as `name`, customers.customer_type,es.status_id, es.expiry_date, tax, a.area_name, ea.estimate_id, 
+            es.received_date, address_line1, address_line2, address_province  from customers
+            left JOIN areas a on a.customer_id = 
+            customers.customer_id left JOIN estimated_areas ea on ea.area_id = a.area_id 
+            left join estimates es on ea.estimate_id = es.estimate_id left JOIN addresses on 
+            customers.address_id = addresses.address_id left JOIN estimate_status s on
              s.status_id = es.status_id where es.estimate_id = :id')->bindValues([':id'=>$id])->queryAll();
 
         return $FindEstimateSql;

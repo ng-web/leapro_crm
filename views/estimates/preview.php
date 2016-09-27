@@ -52,7 +52,7 @@ use app\models\Estimates;
     </tr>
     <tr>
      <td>
-        <?php echo $estimates[0]['company_name']."<br />".
+        <?php echo $estimates[0]['name']."<br />".
              $estimates[0]['address_line1'].", ".$estimates[0]['address_line2']."<br />".$estimates[0]['address_province']?>
      </td>
     </tr>

@@ -9,10 +9,21 @@ use app\models\Companies;
 use app\models\CompanyLocations;
 use app\models\LocationContacts;
 use kartik\date\DatePicker;
+use yii\bootstrap\Modal;
 use wbraganca\dynamicform\DynamicFormWidget;
 /* @var $this yii\web\View */
 /* @var $model app\models\Customers */
 /* @var $form yii\widgets\ActiveForm */
+?>
+
+<?php 
+
+      Modal::begin([
+				'header'=>'<h4></h4>',
+				'id'=>'modal',
+				'size'=>'modal-lg']);
+			echo "<div id='modalContent'></div>";
+	  Modal::end();
 ?>
 
 <div class="customers-form">
@@ -73,10 +84,22 @@ use wbraganca\dynamicform\DynamicFormWidget;
 <div class="row">
 	<div class="col-md-4">
 		<div class="form-group">
-			  <?= Html::submitButton($model->isNewRecord ? 'Create' : 'Update', ['class' => $model->isNewRecord ? 'btn btn-success' : 'btn btn-primary']) ?>
+			  <?= Html::submitButton( 'Create', ['class' => 'btn btn-success']) ?>
 		</div>
 	</div>
 </div>
  <?php ActiveForm::end(); ?>
 
 </div>
+<?php
+   $this->registerJs("
+    $(function(){
+         $('#modalButton').click(function (){
+          $('#modal').modal('show')
+                     .find('#modalContent')
+                 .load($(this).attr('value'));
+             });
+    });
+
+	");
+?>

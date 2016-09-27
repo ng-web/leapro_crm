@@ -34,7 +34,6 @@ use kartik\editable\Editable;
 
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
-
         'pjax'=> true,
        
         'columns' => [

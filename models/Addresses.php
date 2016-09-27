@@ -69,7 +69,10 @@ class Addresses extends \yii\db\ActiveRecord
     {
         return $this->hasMany(CompanyLocations::className(), ['address_id' => 'address_id']);
     }
-
+    public function getCompanies() {
+        return $this->hasMany(Companies::className(), ['company_id' => 'company_id'])
+          ->viaTable('addresses', ['address_id' => 'address_id']);
+    }
     /**
      * @inheritdoc
      * @return AddressesQuery the active query used by this AR class.

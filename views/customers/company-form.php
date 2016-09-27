@@ -61,6 +61,7 @@ use wbraganca\dynamicform\DynamicFormWidget;
                                 }
                             ?>
                      <?= $form->field($company, "[{$i}]company_name")->textInput(['maxlength' => true]) ?>
+                    
 
                 </td>
                 <td>

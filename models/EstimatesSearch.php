@@ -73,7 +73,7 @@ class EstimatesSearch extends Estimates
     public function searchPotentialWork($params)
     {
        $potentialWorkQuery =Estimates::Find()->where(['status_id'=>1]);
-
+ 
         // add conditions that should always apply here
 
         $dataProvider = new ActiveDataProvider([
