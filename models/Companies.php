@@ -31,7 +31,7 @@ class Companies extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['company_id', 'company_name'], 'required'],
+            [['company_id', 'company_name', ], 'required'],
             [['company_id', 'customer_id'], 'integer'],
             [['company_name'], 'string', 'max' => 128],
             [['customer_id'], 'exist', 'skipOnError' => true, 'targetClass' => Customers::className(), 'targetAttribute' => ['customer_id' => 'customer_id']],
@@ -65,11 +65,11 @@ class Companies extends \yii\db\ActiveRecord
     {
         return $this->hasMany(CompanyLocations::className(), ['company_id' => 'company_id']);
     } 
-
-
-
-
-
+    
+    public function getAddresses() {
+        return $this->hasMany(Addresses::className(), ['address_id' => 'address_id'])
+          ->viaTable('company_locations', ['company_id' => 'company_id']);
+    }
     /**
      * @inheritdoc
      * @return CompaniesQuery the active query used by this AR class.

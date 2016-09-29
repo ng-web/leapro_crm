@@ -144,7 +144,7 @@ class AddressesController extends Controller
            $i=0;
             foreach($addresses as $address){
                 if($i==0)
-                   echo "<option value=''>-Choose Area-</option>";
+                   echo "<option value=''>-Choose Address-</option>";
                    echo "<option value='".$address->address_id."'>".
                    $address->address_line1 .' '.$address->address_line2.' '.$address->address_province
 

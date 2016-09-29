@@ -11,8 +11,8 @@ use app\models\Estimates;
 <div class="estimates-form">
     <div class="form-group">
      <?php 
-        if($estimates[0]['status_id'] == 1){
-          echo Html::a('<i class="glyphicon glyphicon-edit"></i> Edit', ['estimates/update'], ['class'=>'btn btn-primary',]);
+        if($estimates[0]['status_id'] == 1 || $estimates[0]['status_id']  == 3 && date('Y-m-d', strtotime($estimates[0]['schedule_date_time'])) > date('Y-m-d')){
+          echo '<a class="btn btn-primary" href="index.php?r=estimates/update&id='.$estimates[0]['estimate_id'].'">Update</a>'; 
         }
          
     ?>
@@ -52,7 +52,7 @@ use app\models\Estimates;
     </tr>
     <tr>
      <td>
-        <?php echo $estimates[0]['company_name']."<br />".
+        <?php echo $estimates[0]['name']."<br />".
              $estimates[0]['address_line1'].", ".$estimates[0]['address_line2']."<br />".$estimates[0]['address_province']?>
      </td>
     </tr>

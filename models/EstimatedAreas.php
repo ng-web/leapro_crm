@@ -66,6 +66,11 @@ class EstimatedAreas extends \yii\db\ActiveRecord
         return $this->hasOne(Estimates::className(), ['estimate_id' => 'estimate_id']);
     }
 
+     public function getProductsUsedPerArea()
+    {
+        return $this->hasMany(ProductsUsedPerArea::className(), ['estimated_area_id' => 'estimated_area_id']);
+    }
+
     /**
      * @inheritdoc
      * @return EstimatedAreasQuery the active query used by this AR class.

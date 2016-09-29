@@ -8,7 +8,7 @@ use app\models\EquipmentSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
-
+use yii\helpers\json;
 /**
  * EquipmentController implements the CRUD actions for Equipment model.
  */
@@ -32,13 +32,47 @@ class EquipmentController extends Controller
      */
     public function actionIndex()
     {
+        $model = new Equipment();
+        $equipment = Equipment::find()->all();
         $searchModel = new EquipmentSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
-        return $this->render('index', [
-            'searchModel' => $searchModel,
-            'dataProvider' => $dataProvider,
-        ]);
+        if(Yii::$app->request->post('hasEditable')){
+          
+
+           $equipment_id = Yii::$app->request->post('editableKey');
+           $equipment = Equipment::FindOne($equipment_id);
+          
+           $out = Json::encode(['output'=>'', 'message'=>'']);
+           $post = [];
+           $posted = current($_POST['Equipment']);
+           $post['Equipment'] = $posted;
+           
+           if($equipment->load($post)){
+             $equipment->save();
+           }
+           echo $out;
+           return;
+       }
+
+        if ($model->load(Yii::$app->request->post())) {
+             
+            if($model->save()){
+                echo 1;
+            }
+            else{
+                echo 0;
+            }
+        } 
+        else 
+        {
+            return $this->render('index', [
+                'searchModel' => $searchModel,
+                'dataProvider' => $dataProvider,
+                 'model' => $model,
+                 'equipment' => $equipment,
+            ]);
+        }
     }
 
     /**

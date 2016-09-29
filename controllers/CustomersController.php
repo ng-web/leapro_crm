@@ -9,6 +9,7 @@ use app\models\Addresses;
 use app\models\Companies;
 use app\models\Contacts;
 use app\models\Estimates;
+use app\models\EstimatesSearch;
 use app\models\CompanyLocations;
 use app\models\LocationContacts;
 use app\models\CustomersSearch;
@@ -63,10 +64,15 @@ class CustomersController extends Controller
     {
        
         
-        $model =Customers::find()->joinWith(['addresses'])
-                            ->where(['customer_id'=>$id])->one();
+        $model =Customers::find()->where(['customer_id'=>$id])->one(); 
+
+        $model =Customers::find()->joinWith(['addresses'])->where(['customer_id'=>$id])->one();
+
+        $companies = Companies::find()->with(['companyLocations'])->joinWith(['addresses'])
+                                      ->where(['customer_id'=>$id])->all();
      
-        $jobOrdersProvider = new SqlDataProvider(
+
+        /*$jobOrdersProvider = new SqlDataProvider(
             ['sql' => Customers::FindAllJobOrdersSql(),
             'params' => [':id' => $id],
             'totalCount' => count(Customers::FindAllJobOrdersSql()),
@@ -85,21 +91,42 @@ class CustomersController extends Controller
             'params' => [':id' => $id],
             'totalCount' =>  count(Customers::FindAllCompanySql()),
             'pagination' => ['pageSize' =>6],
-          ]);
+          ]);*/
 
        
-        return $this->render('view', [
+        return $this->render('customer-profile', [
             'id' => $id,
             'model' => $model,
-            'dataProvider' => $dataProvider,
+            'companies'=>$companies,
+            /*'dataProvider' => $dataProvider,
             'jobOrdersProvider' => $jobOrdersProvider,
-            'companiesDataProvider' => $companiesDataProvider,
+            'companiesDataProvider' => $companiesDataProvider,*/
         ]);
     }
 
     public function actionEstimateStatus($id, $status)
     {
         Estimates::ChangeStatus($id, $status);
+
+        $searchModel = new EstimatesSearch();
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        $potentialWork = $searchModel->searchPotentialWork(Yii::$app->request->queryParams);
+    
+        $jobOrders  =$searchModel->searchJobOrders(Yii::$app->request->queryParams);
+        $declinedWork=$searchModel->searchDeclinedWork(Yii::$app->request->queryParams);
+        $workInvoice  =$searchModel->searchInvoicedWork(Yii::$app->request->queryParams);
+        $closedWork  =$searchModel->searchClosedWork(Yii::$app->request->queryParams);
+
+ 
+        return $this->render('..\estimates\index', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+            'potentialWork' => $potentialWork,
+            'declinedWork' => $declinedWork,
+            'jobOrders' => $jobOrders,
+            'workInvoice'=>$workInvoice,
+            'closedWork' => $closedWork
+        ]);
     }
 
     /**
@@ -327,6 +354,13 @@ class CustomersController extends Controller
         }
     }
 
+    public function actionCustomerDashboard()
+    {
+            return $this->renderAjax('customer-dashboard', [
+                'model' => $model,
+            ]);
+    }
+
     
     /**
      * Finds the Customers model based on its primary key value.
@@ -343,6 +377,8 @@ class CustomersController extends Controller
             throw new NotFoundHttpException('The requested page does not exist.');
         }
     }
+
+   
 	
 	
 }

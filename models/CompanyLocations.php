@@ -32,7 +32,7 @@ class CompanyLocations extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['address_id','branch_name'], 'required'],
+            [['address_id','branch_name','contact_person', 'contact_tel'], 'required'],
             [['company_id', 'address_id'], 'integer'],
             [['address_id'], 'exist', 'skipOnError' => true, 'targetClass' => Addresses::className(), 'targetAttribute' => ['address_id' => 'address_id']],
             [['company_id'], 'exist', 'skipOnError' => true, 'targetClass' => Companies::className(), 'targetAttribute' => ['company_id' => 'company_id']],
@@ -48,7 +48,12 @@ class CompanyLocations extends \yii\db\ActiveRecord
             'company_location_id' => 'Company Location ID',
             'company_id' => 'Company ID',
             'address_id' => 'Address ID',
-            'branch_name' => 'Branch Name',
+            'branch_name' => 'Branch Name',            
+            'contact_person'=>'Contact Person',
+            'contact_tel'=>'Contact Number',
+            'contact_email'=>'Contact Email',
+            'contact_fax'=>'Contact Fax',
+
         ];
     }
 

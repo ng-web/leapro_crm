@@ -115,6 +115,4 @@ class Customers extends \yii\db\ActiveRecord
             = a.area_id left join addresses ad on ad.address_id = company_locations.address_id where companies.customer_id = :id ';
     }
 
-    
-
-  }
+}

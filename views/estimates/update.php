@@ -12,11 +12,11 @@ $this->params['breadcrumbs'][] = 'Update';
 
     <?= $this->render('_form', [
             'customer'=> $customer,
-            'model' => $model,
-            'serviceEstimates' => (empty($serviceEstimates)) ? [new ServiceEstimates] : $serviceEstimates,
-            'estimatedAreas' => (empty($estimatedAreas)) ? [new EstimatedAreas] : $estimatedAreas,
-            'productUsedPerAreas' => (empty($productUsedPerAreas)) ? [new ProductsUsedPerArea] : $productUsedPerAreas,
-        
+        'model' => $model,
+        'productServices' => (empty($productServices)) ? [new productServices] : $productServices,
+		'estimatedAreas' => (empty($estimatedAreas)) ? [new EstimatedAreas] : $estimatedAreas,
+		'productUsedPerAreas' => (empty($productUsedPerAreas)) ? [new ProductsUsedPerArea] : $productUsedPerAreas,
+ 
     ]) ?>
 
 </div>

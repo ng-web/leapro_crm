@@ -3,31 +3,31 @@
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+use app\models\Companies;
+use app\models\Addresses;
 /* @var $this yii\web\View */
 /* @var $searchModel app\models\CompanyLocationsSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = 'Company Locations';
+$this->title = 'Companies';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="company-locations-index">
 
     <h1><?= Html::encode($this->title) ?></h1>
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
-
-    <p>
-        <?= Html::a('Create Company Locations', ['create'], ['class' => 'btn btn-success']) ?>
-    </p>
   <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
-
-            'company_location_id',
-            'company_id',
-            'address_id',
-
+            'branch_name',
+            [
+               'attribute' => 'Address',
+               'value' => function ($model) {
+                  return ''.Addresses::findOne(['address_id'=>$model->address_id])->fullAddress;
+               },
+            ],
             ['class' => 'yii\grid\ActionColumn',
                 'template' => '{sub-areas}',
                'buttons' => [

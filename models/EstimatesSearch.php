@@ -6,6 +6,7 @@ use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use app\models\Estimates;
+use app\models\Assigments;
 
 /**
  * EstimatesSearch represents the model behind the search form about `app\models\Estimates`.
@@ -19,6 +20,7 @@ class EstimatesSearch extends Estimates
     {
         return [
             [['estimate_id','campaign_id', 'status_id'], 'integer'],
+            [['schedule_date_time'], 'string'],
             [['received_date', 'confirmed_date', 'schedule_date_time'], 'safe'],
         ];
     }
@@ -73,7 +75,7 @@ class EstimatesSearch extends Estimates
     public function searchPotentialWork($params)
     {
        $potentialWorkQuery =Estimates::Find()->where(['status_id'=>1]);
-
+ 
         // add conditions that should always apply here
 
         $dataProvider = new ActiveDataProvider([
@@ -105,6 +107,71 @@ class EstimatesSearch extends Estimates
         return $dataProvider;
     }
 
+    public function searchPastAssignments($params)
+    {
+       $assignmentQuery = Assignments::find()->joinWith('estimate')->where(["<", 'estimates.schedule_date_time', date("Y-m-d h:i:s")]);
+ 
+        // add conditions that should always apply here
+
+        $dataProvider = new ActiveDataProvider([
+          'query' => $assignmentQuery,
+          'pagination' => [
+              'pageSize' => 10,
+          ],
+          
+        ]);
+
+        //$this->load($params);
+        // $this->schedule_date_time = $_GET['schedule_date_time'];
+        if (!$this->validate()) {
+            // uncomment the following line if you do not want to return any records when validation fails
+            // $query->where('0=1');
+            return $dataProvider;
+        }
+
+        // grid filtering conditions
+        $assignmentQuery->andFilterWhere([
+            'estimate.estimate_id' => $this->estimate_id,
+            'estimate.schedule_date_time' => $this->schedule_date_time,
+        ]);
+
+         $assignmentQuery->andFilterWhere(['like', 'schedule_date_time', $this->schedule_date_time]);
+
+        return $dataProvider;
+    }
+
+     public function searchRecentAssignments($params)
+    {
+       $assignmentQuery = Assignments::find()->joinWith('estimate')->where([">", 'estimates.schedule_date_time', date("Y-m-d h:i:s")]);
+ 
+        // add conditions that should always apply here
+
+        $dataProvider = new ActiveDataProvider([
+          'query' => $assignmentQuery,
+          'pagination' => [
+              'pageSize' => 10,
+          ],
+          
+        ]);
+
+        //$this->load($params);
+        // $this->schedule_date_time = $_GET['schedule_date_time'];
+        if (!$this->validate()) {
+            // uncomment the following line if you do not want to return any records when validation fails
+            // $query->where('0=1');
+            return $dataProvider;
+        }
+
+        // grid filtering conditions
+        $assignmentQuery->andFilterWhere([
+            'estimate.estimate_id' => $this->estimate_id,
+            'estimate.schedule_date_time' => $this->schedule_date_time,
+        ]);
+
+         //$query->andFilterWhere(['like', 'schedule_date_time', $this->username]);
+
+        return $dataProvider;
+    }
     public function searchJobOrders($params)
     {
        $jobOrdersQuery    =Estimates::Find()->where(['status_id'=>3]);

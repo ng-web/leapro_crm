@@ -65,7 +65,7 @@ class ProductsUsedPerArea extends \yii\db\ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getEstimatedArea()
+    public function getEstimatedAreas()
     {
         return $this->hasOne(EstimatedAreas::className(), ['estimated_area_id' => 'estimated_area_id']);
     }

@@ -41,7 +41,7 @@ class Employees extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['emp_no', 'birth_date', 'first_name', 'last_name', 'gender', 'hire_date', 'emp_pic'], 'required'],
+            [['emp_no', 'birth_date', 'emp_type', 'first_name', 'last_name', 'gender', 'hire_date', 'emp_pic'], 'required'],
             [['emp_no'], 'integer'],
             [['birth_date', 'hire_date'], 'safe'],
             [['gender', 'emp_pic'], 'string'],
@@ -65,6 +65,7 @@ class Employees extends \yii\db\ActiveRecord
             'hire_date' => 'Hire Date',
             'emp_pic' => 'Emp Pic',
             'emp_license_number' => 'Emp License Number',
+            'emp_type'=>'Employee Type'
         ];
     }
 
@@ -124,6 +125,11 @@ class Employees extends \yii\db\ActiveRecord
         return $this->hasMany(Salaries::className(), ['emp_no' => 'emp_no']);
     }
 
+     public function getAssignments()
+    {
+        return $this->hasMany(Assignments::className(), ['emp_id' => 'emp_no']);
+    }
+
     /**
      * @return \yii\db\ActiveQuery
      */
@@ -133,6 +139,6 @@ class Employees extends \yii\db\ActiveRecord
     }
 
     public function getEmployeeName(){
-        return $this->emp_firstname + ' ' + $this->emp_lastname;
+        return $this->first_name.' '.$this->last_name;
     }
 }

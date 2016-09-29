@@ -44,7 +44,7 @@ use wbraganca\dynamicform\DynamicFormWidget;
 					?>
 
 				    <?= $form->field($companyLocation, "[{$i}]branch_name")->textInput(['maxlength' => true])
-				            ->label('Location Name');
+				            ->label('Branch Name');
 				    ?>
 
 				    <?= $form->field($companyLocation, "[{$i}][{$x}]address_id")->dropDownList(ArrayHelper::map(
@@ -53,6 +53,13 @@ use wbraganca\dynamicform\DynamicFormWidget;
 						 ['class'=>'form-control inline-block']
 						 )->label('')
 				    ?>
+
+				    <?= $form->field($companyLocation, "[{$i}][{$x}]contact_person")->textInput(['maxlength' => true]) ?>
+
+					<?= $form->field($companyLocation, "[{$i}][{$x}]contact_email")->textInput(['type' => 'email']) ?>
+					<?= $form->field($companyLocation, "[{$i}][{$x}]contact_tel")->textInput(['type' => 'tel']) ?>
+					<?= $form->field($companyLocation, "[{$i}][{$x}]contact_fax")->textInput(['type' => 'tel']) ?>
+			   		<?= $form->field($companyLocation, 'company_notes')->textarea(['rows' => 4]) ?>
 				
             </td>
           
