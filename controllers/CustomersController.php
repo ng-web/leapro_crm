@@ -141,8 +141,9 @@ class CustomersController extends Controller
 		$companyLocations[] = [new CompanyLocations()];
 		$model->customer_type = $custType;
         if($model->load(Yii::$app->request->post())) {
-           
+            $model->status = 'active';
             $valid = $model->validate();
+           
             if($model->customer_type=='Commercial')
             {
                 
@@ -159,7 +160,7 @@ class CustomersController extends Controller
     				
     			}
 
-                $model->status = 'active';
+                
                    
                 // validate all models
                 //$valid = Model::validateMultiple($estimatedAreas) &&  Model::validateMultiple($productUsedPerAreas) && $valid;
@@ -177,7 +178,10 @@ class CustomersController extends Controller
                                     }
         							else{
         								 foreach ($companyLocations[$i] as $x => $companyLocation) {
+                                              $companyLocation->address_id = (int)$companyLocation->address_id;
         									   $companyLocation->company_id = $company->company_id;
+                                               
+                                               //echo $companyLocation->address_id;die();
             									if (! ($flag = $companyLocation->save(false))) {
             										$transaction->rollBack();
                                            
@@ -204,6 +208,7 @@ class CustomersController extends Controller
             {
                  $flag = $model->save(false);
             }
+            //var_dump($model);die();
             if ($flag) {
                 return $this->redirect(['view', 'id' => $model->customer_id]);
             }

@@ -50,17 +50,17 @@ use wbraganca\dynamicform\DynamicFormWidget;
                     <?php
                             // necessary for update action.
                             if (! $estimatedArea->isNewRecord) {
-                                echo Html::activeHiddenInput($estimatedArea, "[{$i}]area_id");
+                                echo Html::activeHiddenInput($estimatedArea, "[{$j}][{$i}]area_id");
                             }
                     ?>
                    <?php 
                       if($customer->customer_type == 'Commercial')
                       {
                          echo $form->field($estimatedArea, "[{$j}][{$i}]area_id")->dropDownList(ArrayHelper::map(
-    						 Areas::find()->all(), 'area_id', 'area_name'),
-    						 ['prompt'=>''],
-    						 ['class'=>'form-control inline-block']
-    						 )->label('');
+            						 Areas::find()->all(), 'area_id', 'area_name'),
+            						 ['prompt'=>''],
+            						 ['class'=>'form-control inline-block']
+            						 )->label('');
                       }
                       else{
                          echo $form->field($estimatedArea, "[{$j}][{$i}]area_id")->dropDownList(ArrayHelper::map(

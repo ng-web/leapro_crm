@@ -8,9 +8,14 @@ use app\models\EstimatedAreas;
 use app\models\ProductServices;
 use app\models\Companies;
 use app\models\Products;
+use app\models\ServiceEstimates;
 use app\models\Customers;
 use app\models\DynamicForms;
 use app\models\EstimatesSearch;
+use app\models\AssignmentsSearch;
+use app\models\Employees;
+use app\models\Utilities;
+use app\models\Assignments;
 use app\models\ProductsUsedPerArea;
 use app\models\ProductsPerEstimate;
 use yii\web\Controller;
@@ -49,13 +54,9 @@ class EstimatesController extends Controller
     public function actionIndex()
     {
         $searchModel = new EstimatesSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
         $potentialWork = $searchModel->searchPotentialWork(Yii::$app->request->queryParams);
     
-        $jobOrders  =$searchModel->searchJobOrders(Yii::$app->request->queryParams);
         $declinedWork=$searchModel->searchDeclinedWork(Yii::$app->request->queryParams);
-        $workInvoice  =$searchModel->searchInvoicedWork(Yii::$app->request->queryParams);
-        $closedWork  =$searchModel->searchClosedWork(Yii::$app->request->queryParams);
 
         /*
            $potentialWork->query->count();
@@ -65,9 +66,27 @@ class EstimatesController extends Controller
  
         return $this->render('index', [
             'searchModel' => $searchModel,
-            'dataProvider' => $dataProvider,
             'potentialWork' => $potentialWork,
             'declinedWork' => $declinedWork,
+        ]);
+    }
+
+     public function actionJobOrderIndex()
+    {
+        $searchModel = new EstimatesSearch();
+    
+        $jobOrders  =$searchModel->searchJobOrders(Yii::$app->request->queryParams);
+        $workInvoice  =$searchModel->searchInvoicedWork(Yii::$app->request->queryParams);
+        $closedWork  =$searchModel->searchClosedWork(Yii::$app->request->queryParams);
+
+        /*
+           $potentialWork->query->count();
+           gets the overall number of potential work for estimates.
+           Will be used to generate the badges for the tabs.
+        */
+ 
+        return $this->render('job-order-index', [
+            'searchModel' => $searchModel,
             'jobOrders' => $jobOrders,
             'workInvoice'=>$workInvoice,
             'closedWork' => $closedWork
@@ -134,9 +153,30 @@ class EstimatesController extends Controller
 
     public function actionSetSchedule($id, $startDate, $endDate)
     {
-         \Yii::$app->db->createCommand("UPDATE estimates SET schedule_date_time=:date_time, schedule_end_date=:endDate WHERE estimate_id=:id")
-          ->bindValues([':date_time'=> $startDate, ':endDate'=>$endDate, ':id'=>$id])
-          ->execute();
+         $jobOrder = Estimates::findOne($id);
+         if(empty($jobOrder->recurring_value)){
+             \Yii::$app->db->createCommand("UPDATE estimates SET schedule_date_time=:date_time, schedule_end_date=:endDate WHERE estimate_id=:id")
+              ->bindValues([':date_time'=> $startDate, ':endDate'=>$endDate, ':id'=>$id])
+              ->execute();
+        }
+        else{
+          //Create recurring jobs
+           \Yii::$app->db->createCommand("UPDATE estimates SET schedule_date_time=:date_time, schedule_end_date=:endDate WHERE estimate_id=:id")
+              ->bindValues([':date_time'=> $startDate, ':endDate'=>$endDate, ':id'=>$id])
+              ->execute();
+           if($jobOrder->recurring_value == 'W'){
+               $value = Utilities::datediffInWeeks($startDate,date("Y").'-12-31', 1);
+               $type=1;
+          }
+          else if($jobOrder->recurring_value == 'M'){
+               $value = Utilities::datediffInWeeks($startDate,date("Y").'-12-31', 2);
+               $type = 2;
+          }
+         \Yii::$app->db->createCommand("CALL recur_job_orders(:id, :dif, :type)")
+                  ->bindValues([':id'=>$id, 'dif'=>$value, 'type'=>$type])
+                  ->execute();
+
+        }
     }
     /**
      * Creates a new Estimates model.
@@ -146,16 +186,97 @@ class EstimatesController extends Controller
 
     public function actionPreview($id=1)
     {
-
-       $estimates = Estimates::FindEstimateSql($id);
-      // var_dump($estimates); die();
+    
+        $estimates = Estimates::FindEstimateSql($id);
+     
         return  $this->render('preview', [
             'id' => $id,
             'estimates' => $estimates,
         ]);
       
     }
+    public function actionCreateJobOrder($custId)
+    {
+        $model = new Estimates();
+        $productServices = [new ProductServices()];
+        $estimatedAreas[] = [new EstimatedAreas()];
+        $productUsedPerAreas[][] = [new ProductsUsedPerArea()];
+        $customer = Customers::findOne($custId);
+    
+        if ($model->load(Yii::$app->request->post())) {
+      
+           $productServices = DynamicForms::createMultiple(ProductServices::classname());
+           DynamicForms::loadMultiple($productServices, Yii::$app->request->post());
+            
+            //$serviceEstimates = DynamicForms::createMultiple(ServiceEstimates::classname());
+           //DynamicForms::loadMultiple($serviceEstimates, Yii::$app->request->post());
+          
+          $loadsData['_csrf'] =  Yii::$app->request->post()['_csrf'];
 
+          for ($i=0; $i<count($productServices); $i++) {
+            $loadsData['EstimatedAreas'] =  Yii::$app->request->post()['EstimatedAreas'][$i];
+            $estimatedAreas[$i] = DynamicForms::createMultiple(EstimatedAreas::classname(),[] ,$loadsData);
+            DynamicForms::loadMultiple($estimatedAreas[$i], $loadsData);
+                    for($x=0; $x < count($estimatedAreas[$i]); $x++){
+                        $loadsData['ProductsUsedPerArea'] =  Yii::$app->request->post()['ProductsUsedPerArea'][$i][$x];
+                        $productUsedPerAreas[$i][$x] = DynamicForms::createMultiple(ProductsUsedPerArea::classname(),[] ,$loadsData);
+                        DynamicForms::loadMultiple($productUsedPerAreas[$i][$x] , $loadsData);
+                    }
+          }
+               
+          $model->status_id = 3;
+          // validate all models
+          $valid = $model->validate();
+          //$valid = Model::validateMultiple($estimatedAreas) &&  Model::validateMultiple($productUsedPerAreas) && $valid;
+
+          if ($valid) {
+                $transaction = \Yii::$app->db->beginTransaction();
+                try {
+                    if ($flag = $model->save(false)) {
+                      foreach ($productServices as $i => $productService) {    
+                                              
+                        foreach ($estimatedAreas[$i] as $x => $estimatedArea) {
+                            $estimatedArea->estimate_id = $model->estimate_id;
+                            if (! ($flag = $estimatedArea->save(false))) {
+                                $transaction->rollBack();
+                                break;
+                        }
+                        else{
+                           foreach ($productUsedPerAreas[$i][$x] as $j => $productUsedPerArea) {
+                                $product = Products::findOne($productUsedPerArea->product_id);
+                                $productUsedPerArea->product_cost_at_time = $product->product_cost;
+                                $productUsedPerArea->estimated_area_id = $estimatedArea->estimated_area_id;
+                                if (! ($flag = $productUsedPerArea->save(false))) {
+                                  $transaction->rollBack();
+                                  break;
+                                }
+                            }
+                         }
+                      }
+                        
+                    }
+                        
+                    }
+
+                    if ($flag) {
+                        $transaction->commit();
+                        return $this->redirect(['preview', 'id'=>$model->estimate_id]);
+                    }
+                } catch (Exception $e) {
+                    $transaction->rollBack();
+                }
+            }
+        
+        } else {
+            return $this->render('create-job-order', [
+                'customer'=> $customer,
+                'model' => $model,
+                'productServices' => (empty($productServices)) ? [new productServices] : $productServices,
+                'estimatedAreas' => (empty($estimatedAreas)) ? [new EstimatedAreas] : $estimatedAreas,
+                'productUsedPerAreas' => (empty($productUsedPerAreas)) ? [new ProductsUsedPerArea] : $productUsedPerAreas,
+            ]);
+        }
+    }
     public function actionCreate($custId)
     {
         $model = new Estimates();
@@ -166,8 +287,8 @@ class EstimatesController extends Controller
 		
         if ($model->load(Yii::$app->request->post())) {
 			
-			   $productServices = DynamicForms::createMultiple(ProductServices::classname());
-         DynamicForms::loadMultiple($productServices, Yii::$app->request->post());
+			     $productServices = DynamicForms::createMultiple(ProductServices::classname());
+           DynamicForms::loadMultiple($productServices, Yii::$app->request->post());
             
             //$serviceEstimates = DynamicForms::createMultiple(ServiceEstimates::classname());
            //DynamicForms::loadMultiple($serviceEstimates, Yii::$app->request->post());
@@ -250,41 +371,160 @@ class EstimatesController extends Controller
     public function actionUpdate($id = 7)
     {
         $model = $this->findModel($id);
+         $distinctServices = Estimates::getAllDistinctProductsById($id);
+         $services = Estimates::getAllProductsById($id);
         
+        foreach($distinctServices as $i => $ser){
+           $productServices[$i] = ProductServices::findOne(['product_id' => $ser['product_id']]);
+        }
 
+        $estimatedAreas[] = [new EstimatedAreas()];
         $productUsedPerAreas[][] = [new ProductsUsedPerArea()];
-        $customer = Customers::findOne($custId);
-
+       
+        for ($i=0; $i<count($services); $i++) {
+              $estimatedAreas[$i] = Estimates::getAllEstimatedAreasByServiceId($services[$i]['service_id'], $id);
+              for($x=0; $x < count($estimatedAreas[$i]); $x++){
+                  $productUsedPerAreas[$i][$x] = Estimates::getAllProductsByEstimatedAreaId( $estimatedAreas[$i][$x]->estimated_area_id, $services[$i]['service_id'],$id);
+              }
+            
+        }
+      //var_dump($distinctServices);die();
+        
+        if ($model->load(Yii::$app->request->post())) {
+      
          $productServices = DynamicForms::createMultiple(ProductServices::classname());
          DynamicForms::loadMultiple($productServices, Yii::$app->request->post());
+          
+          
+          $loadsData['_csrf'] =  Yii::$app->request->post()['_csrf'];
+        //var_dump(Yii::$app->request->post());die();
+          for ($i=0; $i<count($productServices); $i++) {
+            $loadsData['EstimatedAreas'] =  Yii::$app->request->post()['EstimatedAreas'][$i];
+            $estimatedAreas[$i] = DynamicForms::createMultiple(EstimatedAreas::classname(),[] ,$loadsData);
+            DynamicForms::loadMultiple($estimatedAreas[$i], $loadsData);
+                    for($x=0; $x < count($estimatedAreas[$i]); $x++){
+                       //var_dump($estimatedAreas[$i]);die();
+                        $loadsData['ProductsUsedPerArea'] =  Yii::$app->request->post()['ProductsUsedPerArea'][$i][$x];
+                        $productUsedPerAreas[$i][$x] = DynamicForms::createMultiple(ProductsUsedPerArea::classname(),[] ,$loadsData);
+                        DynamicForms::loadMultiple($productUsedPerAreas[$i][$x] , $loadsData);
+                    }
+          }
+               
+          $model->status_id = 1;
+          // validate all models
+          $valid = $model->validate();
+          //$valid = Model::validateMultiple($estimatedAreas) &&  Model::validateMultiple($productUsedPerAreas) && $valid;
 
+          if ($valid) {
+                $transaction = \Yii::$app->db->beginTransaction();
+                 \Yii::$app->db->createCommand()->delete('estimated_areas', ['estimate_id' => $model->estimate_id])->execute();
+                      
+                try {
+                    if ($flag = $model->save(false)) {
+                      foreach ($productServices as $i => $productService) {    
+                                              
+                        foreach ($estimatedAreas[$i] as $x => $estimatedArea) {
+                         
+                            $estimatedArea->estimate_id = $model->estimate_id;
+                            if (! ($flag = $estimatedArea->save(false))) {
+                                $transaction->rollBack();
+                                break;
+                        }
+                        else{
+                           foreach ($productUsedPerAreas[$i][$x] as $j => $productUsedPerArea) {
+                                $product = Products::findOne($productUsedPerArea->product_id);
+                                $productUsedPerArea->product_cost_at_time = $product->product_cost;
+                                $productUsedPerArea->estimated_area_id = $estimatedArea->estimated_area_id;
+                                if (! ($flag = $productUsedPerArea->save(false))) {
+                                  $transaction->rollBack();
+                                  break;
+                                }
+                            }
+                         }
+                      }
+                        
+                    }
+                        
+                    }
+
+                    if ($flag) {
+                        $transaction->commit();
+                        return $this->redirect(['preview', 'id'=>$model->estimate_id]);
+                    }
+                } catch (Exception $e) {
+                    $transaction->rollBack();
+                }
+            }
         
-         for ($i=0; $i<count($productServices); $i++) {
-              $loadsData['EstimatedAreas'] =  Yii::$app->request->post()['EstimatedAreas'][$i];
-              $estimatedAreas[$i] = DynamicForms::createMultiple(EstimatedAreas::classname(),[] ,$loadsData);
-              DynamicForms::loadMultiple($estimatedAreas[$i], $loadsData);
-              for($x=0; $x < count($estimatedAreas[$i]); $x++){
-                  $loadsData['ProductsUsedPerArea'] =  Yii::$app->request->post()['ProductsUsedPerArea'][$i][$x];
-                  $productUsedPerAreas[$i][$x] = DynamicForms::createMultiple(ProductsUsedPerArea::classname(),[] ,$loadsData);
-                  DynamicForms::loadMultiple($productUsedPerAreas[$i][$x] , $loadsData);
-              }
+        } else {
+          $custId = Estimates::FindCustomerId($id);
+          $customer = Customers::findOne($custId);
+         
+          return $this->render('update', [
+                  'customer'=> $customer,
+                  'model' => $model,
+                  'productServices' => (empty($productServices)) ? [new productServices] : $productServices,
+                  'estimatedAreas' => (empty($estimatedAreas)) ? [new EstimatedAreas] : $estimatedAreas,
+                  'productUsedPerAreas' => (empty($productUsedPerAreas)) ? [new ProductsUsedPerArea] : $productUsedPerAreas,
         
-         }
-            $custId = Estimates::FindCustomerId($id);
-            $customer = Customers::findOne($custId);
-           
-            return $this->render('update', [
-                'customer'=> $customer,
-                'model' => $model,
-                'serviceEstimates' => (empty($serviceEstimates)) ? [new ServiceEstimates] : $serviceEstimates,
-                'estimatedAreas' => (empty($estimatedAreas)) ? [new EstimatedAreas] : $estimatedAreas,
-                'productUsedPerAreas' => (empty($productUsedPerAreas)) ? [new ProductsUsedPerArea] : $productUsedPerAreas,
-            
-            ]);
-       
+          ]);
+      }
+   
     }
 
-    
+    public function actionAssignIndex(){
+       $searchModel = new EstimatesSearch();
+      // $searchModel2 = new AssignmentsSearch();
+       $assignments  =$searchModel->searchPastAssignments(Yii::$app->request->queryParams);
+       $recentAssignments  =$searchModel->searchRecentAssignments(Yii::$app->request->queryParams);
+
+        return $this->render('assign-tech', [
+           'assignments'=> $assignments,   
+           'recentAssignments'=> $recentAssignments,   
+           'searchModel'=>$searchModel      
+        ]);
+    }
+
+     public function actionEditAssignment($id){
+         
+        $estimate = Estimates::findOne($id);
+        $estimate_id = $id;
+         
+        $msg=0;
+        $technicians= \Yii::$app->db->createCommand("SELECT * from employees left join assignments on employees.emp_no = assignments.emp_id
+                        left join estimates on estimates.estimate_id = assignments.estimate_id
+                        where employees.emp_type = 'Technician' and estimates.schedule_date_time is null
+                        or estimates.schedule_end_date < NOW()+ INTERVAL 1 HOUR
+                        union
+                        SELECT * from employees left join assignments on employees.emp_no = assignments.emp_id
+                        left join estimates on estimates.estimate_id = assignments.estimate_id
+                        where employees.emp_type = 'Technician' and estimates.schedule_date_time = :id
+                        or estimates.schedule_end_date < NOW()+ INTERVAL 1 HOUR
+                        ")->bindValues([':id'=>$id, ])->queryAll();
+        
+        if(Yii::$app->request->post()){
+          if(!empty(Yii::$app->request->post()['tech'])){
+               $techs = Yii::$app->request->post()['tech'];
+
+                \Yii::$app->db->createCommand("Delete from  assignments
+                  where estimate_id = $estimate_id")->execute();
+              foreach( $techs as $tech){
+                 \Yii::$app->db->createCommand("INSERT into assignments(emp_id, estimate_id)
+                  values($tech, $estimate_id)")->execute();
+                $msg=1;
+              }
+            }else{
+              $msg=2;
+            }
+          
+        }
+        //var_dump($technicians);die();
+        return $this->render('edit-assignments', [
+           'technicians'=> $technicians, 
+           'estimate_id'=> $estimate_id,
+           'msg'    =>$msg
+        ]);
+    }
 
     /**
      * Deletes an existing Estimates model.

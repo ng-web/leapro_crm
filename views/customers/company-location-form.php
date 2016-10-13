@@ -43,15 +43,15 @@ use wbraganca\dynamicform\DynamicFormWidget;
 							}
 					?>
 
-				    <?= $form->field($companyLocation, "[{$i}]branch_name")->textInput(['maxlength' => true])
+				    <?= $form->field($companyLocation, "[{$i}][{$x}]branch_name")->textInput(['maxlength' => true])
 				            ->label('Branch Name');
 				    ?>
-
+                  
 				    <?= $form->field($companyLocation, "[{$i}][{$x}]address_id")->dropDownList(ArrayHelper::map(
 						 Addresses::find()->all(), 'address_id', 'fullAddress'),
 						 ['prompt'=>'-Choose Address-'],
 						 ['class'=>'form-control inline-block']
-						 )->label('')
+						 )->label('Location')
 				    ?>
 
 				    <?= $form->field($companyLocation, "[{$i}][{$x}]contact_person")->textInput(['maxlength' => true]) ?>
@@ -59,7 +59,7 @@ use wbraganca\dynamicform\DynamicFormWidget;
 					<?= $form->field($companyLocation, "[{$i}][{$x}]contact_email")->textInput(['type' => 'email']) ?>
 					<?= $form->field($companyLocation, "[{$i}][{$x}]contact_tel")->textInput(['type' => 'tel']) ?>
 					<?= $form->field($companyLocation, "[{$i}][{$x}]contact_fax")->textInput(['type' => 'tel']) ?>
-			   		<?= $form->field($companyLocation, 'company_notes')->textarea(['rows' => 4]) ?>
+			   		<?= $form->field($companyLocation, "[{$i}][{$x}]company_notes")->textarea(['rows' => 4]) ?>
 				
             </td>
           

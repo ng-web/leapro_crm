@@ -19,6 +19,7 @@ class CompanyLocationsSearch extends CompanyLocations
     {
         return [
             [['company_location_id', 'company_id', 'address_id'], 'integer'],
+            [['branch_name'], 'string']
         ];
     }
 
@@ -59,10 +60,11 @@ class CompanyLocationsSearch extends CompanyLocations
         // grid filtering conditions
         $query->andFilterWhere([
             'company_location_id' => $this->company_location_id,
-            'company_id' => $this->company_id,
-            'address_id' => $this->address_id,
+            'company_id'  => $this->company_id,
+            'address_id'  => $this->address_id,
         ]);
 
+        $query->andFilterWhere(['like', 'branch_name', $this->branch_name]);
         return $dataProvider;
     }
 }

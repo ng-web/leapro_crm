@@ -15,6 +15,7 @@ use Yii;
  * @property Products $product
  * @property Services $service
  */
+
 class ProductServices extends \yii\db\ActiveRecord
 {
     /**
@@ -67,4 +68,6 @@ class ProductServices extends \yii\db\ActiveRecord
     {
         return $this->hasOne(Services::className(), ['service_id' => 'service_id']);
     }
+
+
 }

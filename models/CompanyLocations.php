@@ -32,7 +32,7 @@ class CompanyLocations extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['address_id','branch_name','contact_person', 'contact_tel'], 'required'],
+            [['branch_name','contact_person', 'contact_tel'], 'required'],
             [['company_id', 'address_id'], 'integer'],
             [['address_id'], 'exist', 'skipOnError' => true, 'targetClass' => Addresses::className(), 'targetAttribute' => ['address_id' => 'address_id']],
             [['company_id'], 'exist', 'skipOnError' => true, 'targetClass' => Companies::className(), 'targetAttribute' => ['company_id' => 'company_id']],

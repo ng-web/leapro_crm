@@ -35,7 +35,7 @@ use yii\widgets\Pjax;
             <span class="info-box-icon bg-red"><i class="fa fa-ban"></i></span>
 
             <div class="info-box-content">
-              <span class="info-box-text">Inactive Leads</span>
+              <span class="info-box-text">In Active Clients</span>
               <span class="info-box-number"> </span>
             </div>
             <!-- /.info-box-content -->
@@ -52,7 +52,7 @@ use yii\widgets\Pjax;
             <span class="info-box-icon bg-green"><i class="fa fa-line-chart"></i></span>
 
             <div class="info-box-content">
-              <span class="info-box-text">Conversion Rate</span>
+              <span class="info-box-text">Client Rate</span>
               <span class="info-box-number"> </span>
             </div>
             <!-- /.info-box-content -->
@@ -60,11 +60,11 @@ use yii\widgets\Pjax;
           <!-- /.info-box -->
         </div>
         <!-- /.col -->
-
+        
         <!-- /.col -->
       </div>
       <!-- /.row -->
-<?php
+<?php 
 $this->title = 'Clients';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
@@ -74,7 +74,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <p>
        <?= Html::submitButton('Add Client', ['value'=>Url::to('index.php?r=customers/customer-type'),'class' =>'btn btn-primary', 'id'=>'modalButton']) ?>
-
+        
     </p>
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
@@ -89,17 +89,26 @@ $this->params['breadcrumbs'][] = $this->title;
                       'template' => '{job-order}',
                 'buttons' => [
                      'job-order' => function ($url, $model, $key) {
-                           return
+                           return 
                            '<a class="btn btn-primary" href="index.php?r=customers/view&id='.$model['customer_id'].'">Profile</a>';
                     }
                 ],
             ],
             ['class' => 'yii\grid\ActionColumn',
+               'template' => '{estimate}',
+                'buttons' => [
+                    'estimate' => function ($url, $model, $key) {
+                           return '<a class="btn btn-success" href="index.php?r=estimates/create&custId='
+                                   .$model['customer_id'].'">Create Estimate</a>';
+                    },
+                ],
+            ],
+            ['class' => 'yii\grid\ActionColumn',
                'template' => '{job-order}',
                 'buttons' => [
-                     'job-order' => function ($url, $model, $key) {
-                           return '<a class="btn btn-danger" href="index.php?r=estimates/create&custId='
-                                   .$model['customer_id'].'">Create Estimate</a>';
+                    'job-order' => function ($url, $model, $key) {
+                           return '<a class="btn btn-danger" href="index.php?r=estimates/create-job-order&custId='
+                                   .$model['customer_id'].'">Create Job Order</a>';
                     }
                 ],
             ],

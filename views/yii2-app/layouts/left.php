@@ -32,12 +32,19 @@
                 'items' => [
                     ['label' => 'Management Menu', 'options' => ['class' => 'header']],
                     [
+                        'label' => 'Dashboard', 
+                        'icon' => 'fa fa-dashboard', 
+                        'url' => ['/dashboard'],
+
+                    ],
+                    [
                         'label' => 'Client Management', 
                         'icon' => 'fa fa-users', 
                         'url' => ['/equipment'],
 
                         'items' => [
                                         ['label' => 'Clients', 'icon' => 'fa fa-dashboard', 'url' => ['/customers'],],
+                                        ['label' => 'Companies', 'icon' => 'fa fa-dashboard', 'url' => ['/company-locations'],],
                                         
                                    ],
                     ],
@@ -49,8 +56,9 @@
                         'url' => '/dashboards/inspection-reports',
                         'items' => [
                             ['label' => 'Estimates', 'icon' => 'fa fa-dashboard', 'url' => ['/estimates'],],
-                            ['label' => 'Job Orders', 'icon' => 'fa fa-calculator', 'url' => ['#'],],
+                            ['label' => 'Job Orders', 'icon' => 'fa fa-calculator', 'url' => ['/estimates/job-order-index'],],
                             ['label' => 'Schedules', 'icon' => 'fa fa-calendar-o', 'url' => ['/estimates/schedules'],],
+                            ['label' => 'Job Assignment', 'icon' => 'fa fa-calendar-o', 'url' => ['/estimates/assign-index'],],
                             
                         ],
                     ],

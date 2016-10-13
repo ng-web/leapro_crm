@@ -32,7 +32,9 @@
         "dektrium/yii2-user": "0.9.*@dev",
         "yiisoft/yii2-authclient": "*",
         "mdmsoft/yii2-admin": "~2.0",
-        "kartik-v/yii2-dialog": "*"
+        "kartik-v/yii2-dialog": "*",
+        "kartik-v/yii2-checkbox-x": "*",
+        "2amigos/yii2-highcharts-widget": "~1.0"
 
     },
 	

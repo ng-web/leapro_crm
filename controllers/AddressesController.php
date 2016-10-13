@@ -8,7 +8,6 @@ use app\models\AddressesSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
-//comment
 
 /**
  * AddressesController implements the CRUD actions for Addresses model.
