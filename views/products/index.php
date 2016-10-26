@@ -1,10 +1,10 @@
 <?php
-
 use yii\helpers\Html;
-use yii\grid\GridView;
-use yii\widgets\Pjax;
-use yii\widgets\ActiveForm;
+use kartik\grid\GridView;
 use yii\helpers\Url;
+use yii\widgets\Pjax;
+use yii\bootstrap\Modal;
+use kartik\editable\Editable;
 /* @var $this yii\web\View */
 /* @var $searchModel app\models\ProductsSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -13,38 +13,63 @@ $this->title = 'Products';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 
+ <?php
+    Modal::begin([
+      'header'=>'<h4>Deploy</h4>',
+      'id'=>'modal',
+      'size'=>'modal-lg',
+      ]);
 
+    echo "<div id='modalContent'></div>";
+
+    Modal::end();
+  ?>
 
   <h1><?= Html::encode('Product List') ?></h1>
-   <?= Html::submitButton('<span class="glyphicon glyphicon-edit"></span> Add Product', ['value'=>Url::to('index.php?r=products/create&id='),'class' =>'btn btn-primary', 'id'=>'modalButton'])?>
-    <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
-     <?php Pjax::begin(); ?>    <?= GridView::widget([
+  
+  <?= Html::button('Add Product', ['value'=>Url::to('index.php?r=products/create'),'class' => 'btn btn-success', 'id'=>'modalButton']) ?>
+     
+     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
+        'pjax'=> true,
         'columns' => [
-            'product_id',
-            'product_name',
-            'product_description:ntext',
-               ['attribute'=>'Product Cost',
+              [
+              'class' => 'kartik\grid\EditableColumn',
+               'attribute' => 'product_name',
+               ],
+               [
+                  'class' => 'kartik\grid\EditableColumn',
+                 'attribute' => 'product_description',
+               ],
+               [
+                  'class' => 'kartik\grid\EditableColumn',
+                 'attribute' => 'product_cost',
                  'value' => function ($data) {
-                        return; //Yii::$app->formatter->asCurrency($data['product_cost'], "$"); 
+                        return $data['product_cost']; 
                     },
-                ],
-            'product_quantity',
+               ],
+               [
+                  'class' => 'kartik\grid\EditableColumn',
+                 'attribute' => 'product_quantity',
+               ]
 
-            ['class' => 'yii\grid\ActionColumn',
-              'template' => '{update}',
-               'buttons' => [
-                    'update' => function ($url, $model, $key) {
-                           return Html::submitButton('<span class="glyphicon glyphicon-edit"></span>', ['value'=>Url::to('index.php?r=products/update&id='.$model['product_id']),'class' =>'', 'id'=>'modalButton']);
-                    }
 
-            ],
-        ],
         ],
     ]); 
-    ?>
-    <?php Pjax::end(); ?>
+?>
+ <?php
+$script = "$(function() {
+       
+        $('#modalButton').click(function(){
+        $('#modal').modal('show')
+                .find('#modalContent')
+                .load($(this).attr('value'));
+        });
+    
+    
+})";
 
+$this->registerJs($script);
 
- 
+?>

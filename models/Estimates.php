@@ -57,20 +57,10 @@ class Estimates extends \yii\db\ActiveRecord
     {
         return $this->hasMany(Schedules::className(), ['estimate_id' => 'estimate_id']);
     }
-
-    public static function CountEstimates($id)
-    {
-       $count = Yii::$app->db->createCommand(' SELECT count(*)
-                FROM companies left JOIN company_locations on company_locations.company_id = companies.company_id 
-                left JOIN areas a on a.company_location_id = company_locations.company_location_id left JOIN estimated_areas ea on ea.area_id
-                = a.area_id left join estimates es on ea.estimate_id = es.estimate_id
-                left JOIN products_used_per_area pa on pa.estimated_area_id = ea.estimated_area_id
-                left JOIN products p on p.product_id = pa.product_id where es.estimate_id = :id')
-                ->bindValues([':id'=>$id, ])->queryScalar();
-        
-        return $count;
-    }
-
+            
+    ###########################################################################################
+    ## Used to find all the products used in estimate and in an area based on the service id ##
+    ###########################################################################################
     public static function FindProductUsedInArea($id, $ser_id, $area_id)
     {
        $products = Yii::$app->db->createCommand(' SELECT Distinct p.product_name, p.product_description, pa.product_cost_at_time, pa.quantity, a.area_name FROM 
@@ -93,7 +83,11 @@ class Estimates extends \yii\db\ActiveRecord
 
         return $products;
     }
+    
 
+    #############################################################################
+    ## Used to find allthe areas based on the estimate and service id          ##
+    #############################################################################
     public static function FindAreas($id, $ser_id)
     {
        $areas = Yii::$app->db->createCommand('SELECT Distinct a.area_name, a.area_id FROM 
@@ -118,7 +112,10 @@ class Estimates extends \yii\db\ActiveRecord
 
         return $areas;
     }
-
+    
+    #############################################################################
+    ## Used to find all the details about an estimate based on the estimate id ##
+    #############################################################################
     public static function FindEstimateSql($id)
     {
         $FindEstimateSql = Yii::$app->db->createCommand('SELECT customers.customer_id, company_locations.company_location_id as `c_id`,
@@ -140,23 +137,11 @@ class Estimates extends \yii\db\ActiveRecord
              s.status_id = es.status_id where es.estimate_id = :id')->bindValues([':id'=>$id])->queryAll();
 
         return $FindEstimateSql;
-    }    
+    }       
 
- 
-     public static function FindAllEstimateSql($id)
-    {
-        $FindEstimateSql = Yii::$app->db->createCommand('SELECT customers.customer_firstname, 
-            customers.customer_lastname, customers.customer_type, tax, a.area_name, ea.estimate_id, company_name, 
-            es.received_date, address_line1, address_line2, address_province FROM companies left JOIN 
-            company_locations on company_locations.company_id = companies.company_id left JOIN customers on 
-            customers.customer_id = companies.customer_id left JOIN areas a on a.company_location_id = 
-            company_locations.company_location_id left JOIN estimated_areas ea on ea.area_id = a.area_id 
-            left join estimates es on ea.estimate_id = es.estimate_id left JOIN addresses on 
-            company_locations.address_id = addresses.address_id left JOIN estimate_status s on
-             s.status_id = es.status_id')->queryAll();
-
-        return $FindEstimateSql;
-    }
+    #######################################################################
+    ## Used to find all the services related to an estimate/job order id ##
+    #######################################################################
     public static function FindServicesSql($id)
     {
         $services = Yii::$app->db->createCommand('SELECT Distinct s.service_id,es.estimate_id, s.service_name, 
@@ -168,7 +153,7 @@ class Estimates extends \yii\db\ActiveRecord
         return $services;
     }
 
-
+    
     public static function FindTotalCost($id)
     {
         $totalCost = Yii::$app->db->createCommand('SELECT sum(pa.product_cost_at_time) * sum(pa.quantity) + sum(sv.service_cost) as `Total Cost` 
@@ -180,6 +165,9 @@ class Estimates extends \yii\db\ActiveRecord
         return $totalCost;
     }
 
+    ##########################################################################################
+    ## Used to find a customer id based on the estimate/job order id passed as the paramter ##
+    ##########################################################################################
     public static function FindCustomerId($id)
     {
         $customer_id = Yii::$app->db->createCommand('SELECT companies.customer_id FROM companies left JOIN 
@@ -199,13 +187,15 @@ class Estimates extends \yii\db\ActiveRecord
 
         return $customer_id;
     }
+    
 
+    ################################################################################
+    ## Returns a list of products to populate a drop-down based on the service id ##
+    ################################################################################
     public static function FindProductByService($service_id)
     {
-         $products = Yii::$app->db->createCommand('SELECT product_services.product_id, product_name, product_cost FROM `products` 
-                                                   inner join product_services on product_services.product_id = products.product_id
-                                                    where service_id = :id group by products.product_id')
-                                                   ->bindValues([':id'=>$service_id, ])->queryAll();
+         $products = Yii::$app->db->createCommand('SELECT products.product_id, product_name, product_cost FROM `products` 
+                                                    where service_id = :id')->bindValues([':id'=>$service_id, ])->queryAll();
          if(count($products)>0){
            $i=0;
             foreach($products as $product){
@@ -220,6 +210,10 @@ class Estimates extends \yii\db\ActiveRecord
             echo "<option>-No product</option>";
         }
     }
+
+    #############################################################################
+    ## Used to find all the details about an estimate based on the estimate id ##
+    #############################################################################
     public static function getAllDistinctProductsById($id=NULL){
        
        $query = Yii::$app->db->createCommand('SELECT  ps.service_id, pr.product_id from estimates inner join estimated_areas ea on ea.estimate_id = 
@@ -271,6 +265,10 @@ class Estimates extends \yii\db\ActiveRecord
        return $results;
     }
     
+
+    ############################################################
+    ## Used to change the status of an estimate and job order ##
+    ############################################################
     public static function ChangeStatus($id, $status)
     {
 
@@ -318,8 +316,10 @@ class Estimates extends \yii\db\ActiveRecord
         return new EstimatesQuery(get_called_class());
     }
 
- 
-
+    
+    #############################################################################################
+    ## Used to calculate the cost of a specific services based on the products used in an area ##
+    #############################################################################################
     public static function CalculateCost($service, $product, $area_id)
     {
         //Length * width = area sq ft
@@ -368,8 +368,6 @@ class Estimates extends \yii\db\ActiveRecord
 
          
        
-        
-        
         switch($service['service_name'])
         {
             case "Misting":

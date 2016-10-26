@@ -1,49 +1,41 @@
 <?php
 
 use yii\helpers\Html;
-use kartik\grid\GridView;
+use yii\grid\GridView;
 
 /* @var $this yii\web\View */
-/* @var $searchModel backend\models\BsrHeaderSearch */
+/* @var $searchModel app\models\BsrActivitySearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = 'Bait Station Reports';
+$this->title = 'Bsr Activities';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
-<div class="bsr-header-index">
+<div class="bsr-activity-index">
 
     <h1><?= Html::encode($this->title) ?></h1>
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
     <p>
-        <?= Html::a('Create Report', ['create'], ['class' => 'btn btn-success']) ?>
-        <!--Html::a('View Activity', ['bsr-activity'], ['class' => 'btn btn-warning'])--> 
+        <?= Html::a('Create Bsr Activity', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
-
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
 
-            //'bsr_id',
-            //trying to link docnum to relevant activity records by id
-            [
-                'attribute' => 'bsr_docnum',
-                'format' => 'raw',
-                'value' => function ($model){
-                    $bsrid = $model['bsr_id'];
-                    $bsrdoc = $model['bsr_docnum'];
-                    return Html::a(Html::encode($bsrdoc), ['bsr-header/bait', 'bsr_id' => $bsrid]);
-                }
-            ],
-            'bsr_approvedby',
-            'bsr_verifiedby',
-            'bsr_date',
-            // 'job_id',
+            'bs_id',
+            'bs_status',
+            'bs_qty',
+            'weight',
+            'number_seen',
+            // 'employee_id',
+            // 'bs_condition',
+            // 'bs_comments:ntext',
+            // 'equipment_id',
+            // 'bsr_id',
 
             ['class' => 'yii\grid\ActionColumn'],
         ],
     ]); ?>
-
 </div>

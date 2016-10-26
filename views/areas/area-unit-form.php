@@ -10,10 +10,13 @@ use app\models\CompanyLocations;
 use app\models\LocationContacts;
 use kartik\date\DatePicker;
 use wbraganca\dynamicform\DynamicFormWidget;
+
+
+$this->title = 'units';
+$this->params['breadcrumbs'][] = $this->title;
 ?>
 
  <?php $form = ActiveForm::begin([
-       'enableAjaxValidation' => true,
        'id'=>'area-unit-form',
     
  ]); ?>

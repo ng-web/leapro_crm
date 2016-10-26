@@ -52,7 +52,7 @@ use yii\widgets\Pjax;
             <span class="info-box-icon bg-green"><i class="fa fa-line-chart"></i></span>
 
             <div class="info-box-content">
-              <span class="info-box-text">Client Rate</span>
+              <span class="info-box-text">Conversion Rate</span>
               <span class="info-box-number"> </span>
             </div>
             <!-- /.info-box-content -->
@@ -86,13 +86,14 @@ $this->params['breadcrumbs'][] = $this->title;
             'customer_type',
             'status',
                     ['class' => 'yii\grid\ActionColumn',
-                      'template' => '{job-order}',
+                      'template' => '{profile} &nbsp {areas}',
                 'buttons' => [
-                     'job-order' => function ($url, $model, $key) {
+                     'profile' => function ($url, $model, $key) {
                            return 
                            '<a class="btn btn-primary" href="index.php?r=customers/view&id='.$model['customer_id'].'">Profile</a>';
-                    }
-                ],
+                    },
+                  ]
+                   
             ],
             ['class' => 'yii\grid\ActionColumn',
                'template' => '{estimate}',
@@ -111,7 +112,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                    .$model['customer_id'].'">Create Job Order</a>';
                     }
                 ],
-            ],
+            ], 
         ],
     ]); ?>
 </div>
@@ -125,6 +126,8 @@ $this->params['breadcrumbs'][] = $this->title;
                  .load($(this).attr('value'));
              });
     });
+
+   
 
 ");
 ?>

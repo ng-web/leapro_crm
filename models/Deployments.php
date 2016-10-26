@@ -21,8 +21,8 @@ class Deployments extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['estimated_area_id',  'equipment_id', 'deploy_date'], 'required'],
-            [['estimated_area_id',  'equipment_id'], 'integer'],
+            [[ 'equipment_id'], 'required'],
+            [[ 'equipment_id'], 'integer'],
             [['deploy_date'], 'safe'],
             [['deploy_notes'], 'string']
         ];
@@ -35,8 +35,8 @@ class Deployments extends \yii\db\ActiveRecord
     {
         return [
             'deploy_id' => 'Deploy ID',
-            'estimated_area_id' => 'estimated area id',
-            'equipment_id' => 'Bait Station No.',
+            'estimated_area_id' => 'Area',
+            'equipment_id' => 'Equipment',
             'deploy_date' => 'Deploy Date',
             'deploy_notes' => 'Notes',
         ];
@@ -57,4 +57,6 @@ class Deployments extends \yii\db\ActiveRecord
     {
         return $this->hasOne(Equipment::className(), ['equipment_id' => 'equipment_id']);
     }
+
+  
 }

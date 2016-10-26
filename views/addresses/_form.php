@@ -1,4 +1,4 @@
-<?php
++<?php
 
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
@@ -41,7 +41,32 @@ use yii\helpers\Url;
 
 <?php
    $this->registerJs("
+       $(function(){
+      var loc_index=0;
+      var loc_in=0;
+      var com_index=0;
 
+          $('.companyform_wrapper').on('afterInsert', function(e, item) {
+                    com_index++;
+                     console.log( com_index++);
+          $('.locationform_wrapper').on('afterInsert', function(e, item) {
+                 console.log('jj');
+                      loc_index++;
+                     $.post('index.php?r=addresses/addresses', function( data ) {
+                           $( 'select#companylocations-'+com_index+'-'+loc_index+'-address_id').html( data );
+             }); 
+          });
+
+          });
+
+           $('.locationform_wrapper').on('afterInsert', function(e, item) {
+                      loc_in++;
+                     $.post('index.php?r=addresses/addresses', function( data ) {
+                           $( 'select#companylocations-'+0+'-'+loc_in+'-address_id').html( data );
+             }); 
+        });
+      
+        
        $('form#{$model->formName()}').on('beforeSubmit', function(e){
            var form = $(this);
 
@@ -55,6 +80,13 @@ use yii\helpers\Url;
                  
                  $.post('index.php?r=addresses/addresses', function( data ) {
                       $('select#customers-address_id' ).html( data );
+                       if(com_index > 0){
+                        console.log('ggg');
+                         // $( 'select#companylocations-'+com_index+'-'+loc_index+'-address_id').html( data );
+                        }else{
+                      // $( 'select#companylocations-'+0+'-'+loc_in+'-address_id').html( data );
+                          console.log('ll');
+                       }
                   });
                  $(form).trigger('reset');
                }
@@ -64,5 +96,6 @@ use yii\helpers\Url;
             });
           return false;
        });
+ });
 ");
 ?>

@@ -1,38 +1,34 @@
 <?php
 
 use yii\helpers\Html;
-use yii\bootstrap\ActiveForm;
-use wbraganca\dynamicform\DynamicFormWidget;
-use app\models\Employees;
-use app\models\Equipment;
-use app\models\EstimatedAreas;
-use yii\helpers\ArrayHelper;
-use dosamigos\datepicker\DatePicker;
-use kartik\select2\Select2;
+use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model backend\models\BsrHeader */
+/* @var $model app\models\BsrActivity */
 /* @var $form yii\widgets\ActiveForm */
 ?>
 
-<div class="bsr-header-form">
+<div class="bsr-activity-form">
 
-    <?php $form = ActiveForm::begin(['id' => 'dynamic-form', 'layout' => 'horizontal']); ?>
+    <?php $form = ActiveForm::begin(); ?>
 
-    <?= $form->field($model, 'bsr_docnum')->textInput(['maxlength' => true]) ?>
+    <?= $form->field($model, 'bs_status')->textInput() ?>
 
-    <?= $form->field($model, 'bsr_approvedby')->textInput(['maxlength' => true]) ?>
+    <?= $form->field($model, 'bs_qty')->textInput() ?>
 
-    <?= $form->field($model, 'bsr_verifiedby')->textInput(['maxlength' => true]) ?>
-    
-    <?= $form->field($model, 'employee_id')->dropDownList(
-        ArrayHelper::map(Employees::find()->all(),'employee_id','employee_name'),
-        ['prompt'=>'Select Technician...' ]
-    );?>
-    
-    
-    
-  
+    <?= $form->field($model, 'weight')->textInput() ?>
+
+    <?= $form->field($model, 'number_seen')->textInput() ?>
+
+    <?= $form->field($model, 'employee_id')->textInput() ?>
+
+    <?= $form->field($model, 'bs_condition')->textInput() ?>
+
+    <?= $form->field($model, 'bs_comments')->textarea(['rows' => 6]) ?>
+
+    <?= $form->field($model, 'equipment_id')->textInput() ?>
+
+    <?= $form->field($model, 'bsr_id')->textInput() ?>
 
     <div class="form-group">
         <?= Html::submitButton($model->isNewRecord ? 'Create' : 'Update', ['class' => $model->isNewRecord ? 'btn btn-success' : 'btn btn-primary']) ?>

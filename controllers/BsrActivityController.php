@@ -14,13 +14,16 @@ use yii\filters\VerbFilter;
  */
 class BsrActivityController extends Controller
 {
+    /**
+     * @inheritdoc
+     */
     public function behaviors()
     {
         return [
             'verbs' => [
                 'class' => VerbFilter::className(),
                 'actions' => [
-                    'delete' => ['post'],
+                    'delete' => ['POST'],
                 ],
             ],
         ];
@@ -34,31 +37,14 @@ class BsrActivityController extends Controller
     {
         $searchModel = new BsrActivitySearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
-        
-        $stationsByDocnum = Yii::$app->db->createCommand('SELECT equipment_id, bs_status, bs_qty 
-            FROM `bsr_activity` 
-            WHERE bsr_docnum LIKE "%E21 9--6.4.02%"')
-            ->queryAll();
-        
-        //var_dump($stationsByDocnum);
-        
+
         return $this->render('index', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
-            'stationsByDocnum' => $stationsByDocnum,
         ]);
     }
-    
-    public function actionJson()
-    {
-        $stationsByDocnum = Yii::$app->db->createCommand('SELECT equipment_id, bs_status, bs_qty 
-            FROM `bsr_activity` INNER JOIN `bsr_header` 
-            ON bsr_activity.bsr_id=bsr_header.bsr_id 
-            WHERE bsr_header.bsr_docnum LIKE "%E21 9--6.4.02%"')
-            ->queryAll();
-    }
 
-        /**
+    /**
      * Displays a single BsrActivity model.
      * @param integer $id
      * @return mixed
@@ -78,7 +64,7 @@ class BsrActivityController extends Controller
     public function actionCreate()
     {
         $model = new BsrActivity();
-        
+
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             return $this->redirect(['view', 'id' => $model->bs_id]);
         } else {

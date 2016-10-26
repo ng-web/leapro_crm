@@ -16,22 +16,24 @@ $this->params['breadcrumbs'][] = $this->title;
 echo Dialog::widget([
    'options' => [], // default options
 ]);
- 
-echo Growl::widget([
-    'type' => Growl::TYPE_SUCCESS,
-    'title' => 'Well done!',
-    'icon' => 'glyphicon glyphicon-ok-sign',
-    'body' => 'You successfully read this important alert message.',
-    'showSeparator' => true,
-    'delay' => 0,
-    'pluginOptions' => [
-        'showProgressbar' => true,
-        'placement' => [
-            'from' => 'bottom',
-            'align' => 'right',
-        ]
-    ]
-]);
+
+if(count($unschedules)>0){
+  echo Growl::widget([
+      'type' => Growl::TYPE_WARNING,
+      'title' => 'Reminder',
+      'icon' => 'glyphicon glyphicon-ok-sign',
+      'body' => 'You have '.count($unschedules).' unscheduled jobs',
+      'showSeparator' => true,
+      'delay' => 0,
+      'pluginOptions' => [
+          'showProgressbar' => true,
+          'placement' => [
+              'from' => 'top',
+              'align' => 'center',
+          ]
+      ]
+  ]);
+}
 
 $DragJS = <<<EOF
 /* initialize the external events
@@ -122,10 +124,7 @@ function(event, delta, revertFunc) {
 }
 EOF;
 ?>
-
-
-
-   <div class="row">
+<div class="row">
         <div class="col-md-3 col-sm-6 col-xs-12">
           <div class="info-box">
             <span class="info-box-icon bg-aqua"><i class="fa fa-calendar"></i></span>
@@ -189,9 +188,11 @@ EOF;
 <div id="external-events">
     <center><h4>Unshedule Job Orders</h4></center>
     <?php foreach($unschedules as $unschedule) : ?>
-     <div class="fc-event ui-draggable ui-draggable-handle" data-id="<?=$unschedule['estimate_id']?>"
-        style="height: 40px; padding: 5px; margin-bottom: 5px;">
-        <?=$unschedule['name']?>
+     <div class="fc-event ui-draggable ui-draggable-handle" 
+          data-id="<?=$unschedule['estimate_id']?>"
+          style="height: 40px; padding: 5px; margin-bottom: 5px; border-radius:0px;"
+     >
+        <?=$unschedule['estimate_id'].' - '.$unschedule['name']?>
     </div>
     <?php endforeach;?>
     

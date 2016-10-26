@@ -69,6 +69,7 @@ class EstimatesController extends Controller
             'potentialWork' => $potentialWork,
             'declinedWork' => $declinedWork,
         ]);
+
     }
 
      public function actionJobOrderIndex()
@@ -116,17 +117,21 @@ class EstimatesController extends Controller
         $unschedules = \Yii::$app->db->createCommand("SELECT company_name as `name`, es.estimate_id FROM customers cu inner join companies on companies.customer_id = cu.customer_id  inner JOIN company_locations on company_locations.company_id = companies.company_id
                                                       inner JOIN areas a on a.company_location_id = company_locations.company_location_id 
                                                       inner JOIN estimated_areas ea on ea.area_id = a.area_id inner join estimates es on 
-                                                      ea.estimate_id = es.estimate_id where es.status_id = 3 and es.schedule_date_time is null union select concat(c.customer_firstname,' ',c.customer_lastname) as `name`, 
+                                                      ea.estimate_id = es.estimate_id where es.status_id = 3 and 
+                                                      es.schedule_date_time is null or es.schedule_date_time < now()
+                                                      union select concat(c.customer_firstname,' ',c.customer_lastname) as `name`, 
                                                       et.estimate_id from customers c inner join areas ar on ar.customer_id = c.customer_id inner join 
                                                       estimated_areas ae on ae.area_id = ar.area_id inner join estimates et on et.estimate_id = ae.estimate_id
-                                                      where et.status_id = 3 and et.schedule_date_time is null")->queryAll();
+                                                      where et.status_id = 3 and et.schedule_date_time is null or et.schedule_date_time < now()")->queryAll();
         $results =  \Yii::$app->db->createCommand("SELECT company_name as `name`, es.estimate_id, schedule_date_time, schedule_end_date FROM customers cu inner join companies on companies.customer_id = cu.customer_id  inner JOIN company_locations on company_locations.company_id = companies.company_id
                                                       inner JOIN areas a on a.company_location_id = company_locations.company_location_id 
                                                       inner JOIN estimated_areas ea on ea.area_id = a.area_id inner join estimates es on 
-                                                      ea.estimate_id = es.estimate_id where es.status_id = 3 and es.schedule_date_time is not null union select concat(c.customer_firstname,' ',c.customer_lastname) as `name`, 
+                                                      ea.estimate_id = es.estimate_id where es.status_id = 3 and 
+                                                      es.schedule_date_time is not null  and es.schedule_date_time > now()
+                                                      union select concat(c.customer_firstname,' ',c.customer_lastname) as `name`, 
                                                       et.estimate_id, schedule_date_time, schedule_end_date from customers c inner join areas ar on ar.customer_id = c.customer_id inner join 
                                                       estimated_areas ae on ae.area_id = ar.area_id inner join estimates et on et.estimate_id = ae.estimate_id
-                                                      where et.status_id = 3 and et.schedule_date_time is not null")->queryAll();
+                                                      where et.status_id = 3 and et.schedule_date_time is not null and et.schedule_date_time > now()")->queryAll();
 
         
         $schedules = array();
@@ -154,25 +159,27 @@ class EstimatesController extends Controller
     public function actionSetSchedule($id, $startDate, $endDate)
     {
          $jobOrder = Estimates::findOne($id);
-         if(empty($jobOrder->recurring_value)){
+        if(empty($jobOrder->recurring_value)){
              \Yii::$app->db->createCommand("UPDATE estimates SET schedule_date_time=:date_time, schedule_end_date=:endDate WHERE estimate_id=:id")
               ->bindValues([':date_time'=> $startDate, ':endDate'=>$endDate, ':id'=>$id])
               ->execute();
         }
         else{
           //Create recurring jobs
-           \Yii::$app->db->createCommand("UPDATE estimates SET schedule_date_time=:date_time, schedule_end_date=:endDate WHERE estimate_id=:id")
+          \Yii::$app->db->createCommand("UPDATE estimates SET schedule_date_time=:date_time, schedule_end_date=:endDate,
+                                          recurring_value=null WHERE estimate_id=:id")
               ->bindValues([':date_time'=> $startDate, ':endDate'=>$endDate, ':id'=>$id])
               ->execute();
-           if($jobOrder->recurring_value == 'W'){
-               $value = Utilities::datediffInWeeks($startDate,date("Y").'-12-31', 1);
-               $type=1;
+          if($jobOrder->recurring_value == 'W'){
+                 $value = Utilities::datediffInWeeks($startDate,date("Y").'-12-31', 1);
+                 $type=1;
           }
           else if($jobOrder->recurring_value == 'M'){
                $value = Utilities::datediffInWeeks($startDate,date("Y").'-12-31', 2);
                $type = 2;
           }
-         \Yii::$app->db->createCommand("CALL recur_job_orders(:id, :dif, :type)")
+
+          \Yii::$app->db->createCommand("CALL recur_job_orders(:id, :dif, :type)")
                   ->bindValues([':id'=>$id, 'dif'=>$value, 'type'=>$type])
                   ->execute();
 
@@ -184,11 +191,15 @@ class EstimatesController extends Controller
      * @return mixed
      */
 
-    public function actionPreview($id=1)
+    public function actionPreview($id=0)
     {
     
         $estimates = Estimates::FindEstimateSql($id);
-     
+        if(count($estimates)==0){
+          
+            throw new NotFoundHttpException('The requested page does not exist.');
+        
+        }
         return  $this->render('preview', [
             'id' => $id,
             'estimates' => $estimates,
@@ -208,8 +219,6 @@ class EstimatesController extends Controller
            $productServices = DynamicForms::createMultiple(ProductServices::classname());
            DynamicForms::loadMultiple($productServices, Yii::$app->request->post());
             
-            //$serviceEstimates = DynamicForms::createMultiple(ServiceEstimates::classname());
-           //DynamicForms::loadMultiple($serviceEstimates, Yii::$app->request->post());
           
           $loadsData['_csrf'] =  Yii::$app->request->post()['_csrf'];
 
@@ -277,7 +286,7 @@ class EstimatesController extends Controller
             ]);
         }
     }
-    public function actionCreate($custId)
+    public function actionCreate($custId=0)
     {
         $model = new Estimates();
         $productServices = [new ProductServices()];
@@ -290,8 +299,6 @@ class EstimatesController extends Controller
 			     $productServices = DynamicForms::createMultiple(ProductServices::classname());
            DynamicForms::loadMultiple($productServices, Yii::$app->request->post());
             
-            //$serviceEstimates = DynamicForms::createMultiple(ServiceEstimates::classname());
-           //DynamicForms::loadMultiple($serviceEstimates, Yii::$app->request->post());
           
     			$loadsData['_csrf'] =  Yii::$app->request->post()['_csrf'];
 
@@ -368,7 +375,7 @@ class EstimatesController extends Controller
      * @return mixed
      */
 
-    public function actionUpdate($id = 7)
+    public function actionUpdate($id = 0)
     {
         $model = $this->findModel($id);
          $distinctServices = Estimates::getAllDistinctProductsById($id);
@@ -388,7 +395,6 @@ class EstimatesController extends Controller
               }
             
         }
-      //var_dump($distinctServices);die();
         
         if ($model->load(Yii::$app->request->post())) {
       
@@ -397,13 +403,12 @@ class EstimatesController extends Controller
           
           
           $loadsData['_csrf'] =  Yii::$app->request->post()['_csrf'];
-        //var_dump(Yii::$app->request->post());die();
+
           for ($i=0; $i<count($productServices); $i++) {
             $loadsData['EstimatedAreas'] =  Yii::$app->request->post()['EstimatedAreas'][$i];
             $estimatedAreas[$i] = DynamicForms::createMultiple(EstimatedAreas::classname(),[] ,$loadsData);
             DynamicForms::loadMultiple($estimatedAreas[$i], $loadsData);
                     for($x=0; $x < count($estimatedAreas[$i]); $x++){
-                       //var_dump($estimatedAreas[$i]);die();
                         $loadsData['ProductsUsedPerArea'] =  Yii::$app->request->post()['ProductsUsedPerArea'][$i][$x];
                         $productUsedPerAreas[$i][$x] = DynamicForms::createMultiple(ProductsUsedPerArea::classname(),[] ,$loadsData);
                         DynamicForms::loadMultiple($productUsedPerAreas[$i][$x] , $loadsData);
@@ -485,7 +490,7 @@ class EstimatesController extends Controller
         ]);
     }
 
-     public function actionEditAssignment($id){
+     public function actionEditAssignment($id=0){
          
         $estimate = Estimates::findOne($id);
         $estimate_id = $id;
@@ -518,7 +523,7 @@ class EstimatesController extends Controller
             }
           
         }
-        //var_dump($technicians);die();
+        
         return $this->render('edit-assignments', [
            'technicians'=> $technicians, 
            'estimate_id'=> $estimate_id,

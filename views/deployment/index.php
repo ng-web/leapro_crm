@@ -18,8 +18,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
     <p>
-        <?= Html::button('Deploy', ['value'=>Url::to('index.php?r=deployment/create'),'class' => 'btn btn-success', 'id'=>'modalButton']) ?>
-        
+        <?= Html::button('Deploy', ['value'=>Url::to('index.php?r=deployment/deploy-equipement'),'class' => 'btn btn-success', 'id'=>'modalButton']) ?>
     </p>
 
     <?= GridView::widget([

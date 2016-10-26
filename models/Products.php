@@ -12,8 +12,10 @@ use Yii;
  * @property string $product_description
  * @property double $product_cost
  * @property double $product_quantity
- *
- * @property ProductsUsedPerArea[] $productsUsedPerAreas
+ * @property string $ingredients
+ * @property double $dilution
+ * @property string $application
+ * @property integer $service_id
  */
 class Products extends \yii\db\ActiveRecord
 {
@@ -31,10 +33,13 @@ class Products extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['product_name'], 'required'],
-            [['product_description'], 'string'],
-            [['product_cost', 'product_quantity'], 'number'],
+            [['product_name', 'service_id'], 'required'],
+            [['product_description', 'ingredients'], 'string'],
+            [['product_cost', 'product_quantity', 'dilution'], 'number'],
+            [['service_id'], 'integer'],
             [['product_name'], 'string', 'max' => 128],
+            [['application'], 'string', 'max' => 60],
+            [['service_id'], 'exist', 'skipOnError' => true, 'targetClass' => Services::className(), 'targetAttribute' => ['service_id' => 'service_id']],
         ];
     }
 
@@ -49,31 +54,10 @@ class Products extends \yii\db\ActiveRecord
             'product_description' => 'Product Description',
             'product_cost' => 'Product Cost',
             'product_quantity' => 'Product Quantity',
+            'ingredients' => 'Ingredients',
+            'dilution' => 'Dilution',
+            'application' => 'Application',
+            'service_id' => 'Service',
         ];
-    }
-
-    /**
-     * @return \yii\db\ActiveQuery
-     */
-    public function getProductsUsedPerAreas()
-    {
-        return $this->hasMany(ProductsUsedPerArea::className(), ['product_id' => 'product_id']);
-    }
-
-    /**
-     * @inheritdoc
-     * @return ProductsQuery the active query used by this AR class.
-     */
-    public static function find()
-    {
-        return new ProductsQuery(get_called_class());
-    }
-
-    public static function FindProductSql($id)
-    {
-        $FindEstimateSql = Yii::$app->db->createCommand('SELECT * FROM products inner join `product_services` on products.product_id = product_services.product_id
-         inner join services on services.service_id = product_services.service_id where products.product_id = :id')->bindValues([':id'=>$id])->queryAll();
-
-        return $FindEstimateSql;
     }
 }

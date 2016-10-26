@@ -9,7 +9,7 @@ use kartik\dialog\Dialog;
 ?>
 
 <?php
-$this->title = 'Edit Assignments';
+this->title = 'Edit Assignments';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <?php $form = ActiveForm::begin(); ?>
@@ -27,7 +27,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <br />
     <br />
     <button type="submit" class="btn btn-primary">Save Changes</button>
-<?php ActiveForm::end(); ?> 
+<?php ActiveForm::end(); ?> $
 
 
 

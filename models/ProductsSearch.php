@@ -8,7 +8,7 @@ use yii\data\ActiveDataProvider;
 use app\models\Products;
 
 /**
- * ProductsSearch represents the model behind the search form about `app\models\Products`.
+ * ProductsSearch represents the model behind the search form of `app\models\Products`.
  */
 class ProductsSearch extends Products
 {
@@ -18,9 +18,9 @@ class ProductsSearch extends Products
     public function rules()
     {
         return [
-            [['product_id'], 'integer'],
-            [['product_name', 'product_description'], 'safe'],
-            [['product_cost', 'product_quantity'], 'number'],
+            [['product_id', 'service_id'], 'integer'],
+            [['product_name', 'product_description', 'ingredients', 'application'], 'safe'],
+            [['product_cost', 'product_quantity', 'dilution'], 'number'],
         ];
     }
 
@@ -63,10 +63,14 @@ class ProductsSearch extends Products
             'product_id' => $this->product_id,
             'product_cost' => $this->product_cost,
             'product_quantity' => $this->product_quantity,
+            'dilution' => $this->dilution,
+            'service_id' => $this->service_id,
         ]);
 
         $query->andFilterWhere(['like', 'product_name', $this->product_name])
-            ->andFilterWhere(['like', 'product_description', $this->product_description]);
+            ->andFilterWhere(['like', 'product_description', $this->product_description])
+            ->andFilterWhere(['like', 'ingredients', $this->ingredients])
+            ->andFilterWhere(['like', 'application', $this->application]);
 
         return $dataProvider;
     }

@@ -15,11 +15,8 @@ use Yii;
  * @property integer $employee_id
  * @property integer $bs_condition
  * @property string $bs_comments
- * @property string $bs_date
- * @property integer $estimated_area_id
- *
- * @property EstimatedAreas $estimatedArea
- * @property Employees $employee
+ * @property integer $equipment_id
+ * @property integer $bsr_id
  */
 class BsrActivity extends \yii\db\ActiveRecord
 {
@@ -37,12 +34,12 @@ class BsrActivity extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['bs_status', 'bs_condition', 'estimated_area_id'], 'required'],
-            [['bs_status', 'bs_qty', 'weight', 'number_seen', 'employee_id', 'bs_condition', 'estimated_area_id'], 'integer'],
-            [['bs_comments', 'bsr_approvedby', 'bsr_verifiedby'], 'string'],
-            [['bs_date'], 'safe'],
-            [['estimated_area_id'], 'exist', 'skipOnError' => true, 'targetClass' => EstimatedAreas::className(), 'targetAttribute' => ['estimated_area_id' => 'estimated_area_id']],
+            [['bs_status', 'bs_condition', 'equipment_id'], 'required'],
+            [['bs_status', 'bs_qty', 'weight', 'number_seen', 'employee_id', 'bs_condition', 'equipment_id', 'bsr_id'], 'integer'],
+            [['bs_comments'], 'string'],
+            [['bsr_id'], 'exist', 'skipOnError' => true, 'targetClass' => BsrHeader::className(), 'targetAttribute' => ['bsr_id' => 'id']],
             [['employee_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employees::className(), 'targetAttribute' => ['employee_id' => 'emp_no']],
+            [['equipment_id'], 'exist', 'skipOnError' => true, 'targetClass' => Equipment::className(), 'targetAttribute' => ['equipment_id' => 'equipment_id']],
         ];
     }
 
@@ -60,24 +57,8 @@ class BsrActivity extends \yii\db\ActiveRecord
             'employee_id' => 'Employee ID',
             'bs_condition' => 'Bs Condition',
             'bs_comments' => 'Bs Comments',
-            'bs_date' => 'Bs Date',
-            'estimated_area_id' => 'Estimated Area ID',
+            'equipment_id' => 'Equipment ID',
+            'bsr_id' => 'Bsr ID',
         ];
-    }
-
-    /**
-     * @return \yii\db\ActiveQuery
-     */
-    public function getEstimatedArea()
-    {
-        return $this->hasOne(EstimatedAreas::className(), ['estimated_area_id' => 'estimated_area_id']);
-    }
-
-    /**
-     * @return \yii\db\ActiveQuery
-     */
-    public function getEmployee()
-    {
-        return $this->hasOne(Employees::className(), ['emp_no' => 'employee_id']);
     }
 }

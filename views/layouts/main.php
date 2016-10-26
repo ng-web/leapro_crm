@@ -102,24 +102,22 @@ $(function(){
         Trigger when the an service dynamic field is added.
         Increment the index number and popular the product dropdown;
     */
-     $(".service_form_wrappper").on("afterInsert", function(e, item) {
+     $('.service_form_wrappper').on('afterInsert', function(e, item) {
         serivce_index++;
         $("select#productservices-"+serivce_index+"-service_id").change(function(){
              
-                  $.post("index.php?r=estimates/find-product-by-service&id="+$(this).val(), function( data ) {
-                      $( "select#productsusedperarea-"+serivce_index+"-"+area_index+"-0-product_id" ).html( data );});
+                  $.post('index.php?r=estimates/find-product-by-service&id='+$(this).val(), function( data ) {
+                      $( 'select#productsusedperarea-'+serivce_index+'-'+area_index+'-0-product_id' ).html( data );});
           });
                 /*
                     Trigger when the an area dynamic field is added.
                     Increment the index number and popular the product dropdown;
                 */
-                $(".area_form_wrapper").on("afterInsert", function(e, item) {
+                $('.area_form_wrapper').on('afterInsert', function(e, item) {
                     area_index++;
-                   $.post("index.php?r=estimates/find-product-by-service&id="+$("select#productservices-"+serivce_index+"-service_id").val(), function( data ) {
-                         $( "select#productsusedperarea-"+serivce_index+"-"+area_index+"-0-product_id" ).html( data );
-                   });
-
-                   
+                   $.post('index.php?r=estimates/find-product-by-service&id='+$('select#productservices-'+serivce_index+'-service_id').val(), function( data ) {
+                         $( 'select#productsusedperarea-'+serivce_index+'-'+area_index+'-0-product_id').html( data );
+                   });      
                    
                 }); 
 
@@ -127,11 +125,11 @@ $(function(){
                     Trigger when the an product dynamic field is added.
                     Increment the index number and popular the product dropdown;
                 */
-               $(".product_form_wrapper").on("afterInsert", function(e, item) {
+               $('.product_form_wrapper').on('afterInsert', function(e, item) {
                     product_index++;
                     console.log(7);
-                       $.post("index.php?r=estimates/find-product-by-service&id="+$("select#productservices-"+serivce_index+"-service_id").val(), function( data ) {
-                         $( "select#productsusedperarea-"+serivce_index+"-"+area_index+"-"+product_index+"-product_id" ).html( data );
+                       $.post('index.php?r=estimates/find-product-by-service&id='+$('select#productservices-'+serivce_index+'-service_id').val(), function( data ) {
+                         $( 'select#productsusedperarea-'+serivce_index+'-'+area_index+'-'+product_index+'-product_id').html( data );
                    });
 
                 }); 
@@ -140,8 +138,8 @@ $(function(){
                         Trigger when the a product dynamic field is removed.
                         Reorder the product index number 
                    */
-                    $(".product_form_wrapper").on("afterDelete", function(e) {
-                        console.log("Deleted item!");
+                    $('.product_form_wrapper').on('afterDelete', function(e) {
+                        console.log('Deleted item!');
                         product_index--;
                     });
                     
@@ -149,16 +147,16 @@ $(function(){
                         Trigger when the an area dynamic field is removed.
                         Reorder the area index number 
                     */
-                   $(".area_form_wrapper").on("afterDelete", function(e) {
-                        console.log("Area Deleted item!");
+                   $('.area_form_wrapper').on('afterDelete', function(e) {
+                        console.log('Area Deleted item!');
                         area_index--;
                     });
             /*
                 Trigger when the a service dynamic field is removed.
                 Reorder the service index number 
             */
-             $(".service_form_wrappper").on("afterDelete", function(e) {
-                    console.log("Service Deleted item!");
+             $('.service_form_wrappper').on('afterDelete', function(e) {
+                    console.log('Service Deleted item!');
                     service_index--;
               });
 

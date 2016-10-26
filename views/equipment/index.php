@@ -5,6 +5,8 @@ use kartik\grid\GridView;
 use yii\widgets\Pjax;
 use yii\widgets\ActiveForm;
 use kartik\editable\Editable;
+use app\models\Services;
+use yii\helpers\ArrayHelper;
 
 //$this->params['breadcrumbs'][] = $this->title;
 
@@ -23,6 +25,9 @@ $this->title = 'Equipment Management';
         <?= $form->field($model, 'equipment_name')->textInput(['maxlength' => true]) ?>
 
         <?= $form->field($model, 'equipment_barcode')->textInput(['maxlength' => true]) ?>
+        
+         <?= $form->field($model, "service_id")->dropDownList(
+        ArrayHelper::map( Services::find()->all(),'service_id','service_name'));?>
 
         <?= $form->field($model, 'equipment_description')->textarea(['rows' => 6]) ?>
 
