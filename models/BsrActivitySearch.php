@@ -8,7 +8,7 @@ use yii\data\ActiveDataProvider;
 use app\models\BsrActivity;
 
 /**
- * BsrActivitySearch represents the model behind the search form about `backend\models\BsrActivity`.
+ * BsrActivitySearch represents the model behind the search form of `app\models\BsrActivity`.
  */
 class BsrActivitySearch extends BsrActivity
 {
@@ -18,8 +18,8 @@ class BsrActivitySearch extends BsrActivity
     public function rules()
     {
         return [
-            [['bs_id', 'bs_status', 'bs_qty', 'weight', 'number_seen', 'bs_condition'], 'integer'],
-            [['bs_comments', 'bs_date', 'equipment_id', 'employee_id',], 'safe'],
+            [['bs_id', 'bs_status', 'bs_qty', 'weight', 'number_seen', 'employee_id', 'bs_condition', 'equipment_id', 'bsr_id'], 'integer'],
+            [['bs_comments'], 'safe'],
         ];
     }
 
@@ -43,11 +43,10 @@ class BsrActivitySearch extends BsrActivity
     {
         $query = BsrActivity::find();
 
+        // add conditions that should always apply here
+
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'pagination' => [
-                'pagesize' => 15
-            ]
         ]);
 
         $this->load($params);
@@ -57,24 +56,21 @@ class BsrActivitySearch extends BsrActivity
             // $query->where('0=1');
             return $dataProvider;
         }
-        
-       // $query->joinWith('equipment');
-        $query->joinWith('employee');
 
+        // grid filtering conditions
         $query->andFilterWhere([
             'bs_id' => $this->bs_id,
             'bs_status' => $this->bs_status,
             'bs_qty' => $this->bs_qty,
             'weight' => $this->weight,
             'number_seen' => $this->number_seen,
+            'employee_id' => $this->employee_id,
             'bs_condition' => $this->bs_condition,
-            'bs_date' => $this->bs_date,
+            'equipment_id' => $this->equipment_id,
+            'bsr_id' => $this->bsr_id,
         ]);
 
-        $query->andFilterWhere(['like', 'bs_comments', $this->bs_comments])
-                //->andFilterWhere(['like', 'equipment.equipment_name', $this->equipment_id])
-                ->andFilterWhere(['like', 'bsr_docnum', $this->bsr_docnum])
-                ->andFilterWhere(['like', 'employee.employee_name', $this->employee_id]);
+        $query->andFilterWhere(['like', 'bs_comments', $this->bs_comments]);
 
         return $dataProvider;
     }

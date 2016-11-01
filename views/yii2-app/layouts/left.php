@@ -44,12 +44,21 @@
 
                         'items' => [
                                         ['label' => 'Clients', 'icon' => 'fa fa-dashboard', 'url' => ['/customers'],],
-                                        ['label' => 'Companies', 'icon' => 'fa fa-dashboard', 'url' => ['/company-locations'],],
+                                        ['label' => 'Areas', 'icon' => 'fa fa-dashboard', 'url' => ['/company-locations'],],
                                         
                                    ],
                     ],
                     
-                    ['label' => 'Equipment Management', 'icon' => 'fa fa-wrench', 'url' => ['/equipment'],],
+                    [ 
+                      'label' => 'Equipments & Products', 
+                      'icon' => 'fa fa-wrench', 
+                      'items' => [
+                            ['label' => 'equipments', 'icon' => '', 'url' => ['/equipment'],],
+                            ['label' => 'products', 'icon' => '', 'url' => ['/products'],],
+                           
+                        ],
+
+                    ],
                     [
                         'label' => 'Job Management',
                         'icon' => 'fa fa-arrows',
@@ -62,8 +71,14 @@
                             
                         ],
                     ],
+                     [
+                        'label' => 'Deployment & Inspection', 
+                        'icon' => '', 
+                        'url' => ['/bsr-header'],
+
+                    ],
                    // ['label' => 'Login', 'url' => ['site/login'], 'visible' => Yii::$app->user->isGuest],
-                    [
+                   /* [
                         'label' => 'Tehnician Reports',
                         'icon' => 'fa fa-list-alt',
                         'url' => '/dashboards/inspection-reports',
@@ -89,7 +104,9 @@
                                 ],
                             ],
                         ],
-                    ],
+                    ],*/
+
+                    
                 ],
             ]
         ) ?>

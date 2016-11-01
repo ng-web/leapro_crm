@@ -17,7 +17,7 @@ use app\models\Estimates;
          
     ?>
      
-    </div>
+</div>
 
 <?php 
   //Queries to display preview
@@ -57,7 +57,7 @@ use app\models\Estimates;
      </td>
     </tr>
 </table>
-</div>
+
 <br />
 
 
@@ -142,8 +142,8 @@ use app\models\Estimates;
 <?php
    $tax = ($subTotal*$estimates[0]['tax']/100);
 ?>
- <div  style="float: right">
-   <table class="table">
+
+   <table class="table" >
        <tr>
       <th colspan="4" style="text-align: right">Sub Total</th>
       <th>$<?php echo number_format($subTotal, 2);?></th>
@@ -161,6 +161,7 @@ use app\models\Estimates;
       <th>$<?php echo number_format($subTotal + ($tax) - $discounts, 2)?></th>
     </tr>
    </table>
- </div>
+
+
 
 

@@ -30,7 +30,7 @@ class Equipment extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['equipment_name'], 'required'],
+            [['equipment_name', 'service_id'], 'required'],
             [['equipment_description'], 'string'],
             [['equipment_name'], 'string', 'max' => 30],
             [['equipment_barcode'], 'string', 'max' => 50],
@@ -47,6 +47,7 @@ class Equipment extends \yii\db\ActiveRecord
             'equipment_name' => 'Equipment Name',
             'equipment_barcode' => 'Equipment Barcode',
             'equipment_description' => 'Equipment Description',
+            'service_id' =>'Service'
         ];
     }
 

@@ -50,7 +50,10 @@ use wbraganca\dynamicform\DynamicFormWidget;
 			 ['class'=>'form-control inline-block']
 			 )->label('Location') 
 	    ?>
-	    <a value="<?= Url::to('index.php?r=customers/new-address')?>" class ='btn btn-primary' id='modalButton'>
+	    <a value="<?= Url::to('index.php?r=customers/new-address')?>" 
+	    	class ='btn btn-primary' 
+	    	id='modalButton'
+	    	style=" top: 120px; right: 0px; position:fixed; z-index:300">
 		 Add Address
 		</a>
 	     
@@ -102,4 +105,6 @@ use wbraganca\dynamicform\DynamicFormWidget;
     });
 
 	");
+
+
 ?>

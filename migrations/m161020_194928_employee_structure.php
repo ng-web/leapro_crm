@@ -34,7 +34,7 @@ class m161020_194928_employee_structure extends Migration
       //     'hire_date' => $this->date()->notNull(),
       //     'termination_date' => $this->date(),
       //   ]);
-        $this->createTable('{{%salaries}}', [
+        $this->createTable('{{%salary}}', [
           'salary_id' => $this->primaryKey(),
           'emp_id' => $this->integer(),
           'salary' => $this->integer(),

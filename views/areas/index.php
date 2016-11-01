@@ -7,35 +7,36 @@ use yii\widgets\Pjax;
 use yii\bootstrap\Modal;
 use kartik\editable\Editable;
 
-     Modal::begin([ 'header'=>'<h4></h4>','id'=>'modal-units','size'=>'modal-lg']);
-                echo "<div id='modalContent'></div>";
-      Modal::end();
+#---------------------------Model Pop-up declaration--------------------------#
 
-      Modal::begin([
-                'header'=>'<h4></h4>',
-                'id'=>'modal-area',
-                'size'=>'modal-lg']);
-                echo "<div id='modalContent'></div>";
-      Modal::end();
+ Modal::begin([ 'header'=>'<h4></h4>','id'=>'modal-units','size'=>'modal-lg']);
+            echo "<div id='modalContent'></div>";
+  Modal::end();
 
+  Modal::begin([
+            'header'=>'<h4></h4>',
+            'id'=>'modal-area',
+            'size'=>'modal-lg']);
+            echo "<div id='modalContent'></div>";
+  Modal::end();
 
+#------------------------------------------------------------------------------#
  
+$this->title = 'areas';
+$this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="areas-index">
 
-    <h1><?= Html::encode($this->title) ?></h1>
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
     <p>
-       
-        <?= Html::submitButton('Add Area', ['value'=>Url::to('index.php?r=areas/create&id='.$company_location_id.''),'class' =>'btn btn-primary', 'id'=>'modalAreaButton']) ?>
+       <?= Html::submitButton('Add Area', ['value'=>Url::to('index.php?r=areas/create&id='.$company_location_id.''),'class' =>'btn btn-primary', 'id'=>'modalAreaButton']) ?>
     </p>
    <?= GridView::widget([
 
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
-        'pjax'=> true,
-       
+        
         'columns' => [
             [
               'class' => 'kartik\grid\EditableColumn',
@@ -50,9 +51,9 @@ use kartik\editable\Editable;
                 'header'=>'Units Info',
                 'value'=> function($data)
                           { 
-                            return  Html::a(Yii::t('app', ' {modelClass}', [
-                            'modelClass' => 'Units',]), ['areas/area-units','id'=>$data->area_id], ['class' => 'btn btn-success', 'id' => 'popupModal']);      
-                          },
+                             return '<a class="btn btn-primary" href="index.php?r=areas/area-units&id='.$data['area_id'].'" ><i class="glyphicon glyphicon-edit"></i>Units</a>';
+           
+                                },
                 'format' => 'raw'
             ],
             ['class' => 'yii\grid\ActionColumn',
@@ -72,6 +73,9 @@ use kartik\editable\Editable;
 </div>
 
 <?php 
+
+#----------------------------Modal pop up event trigger--------------------------#
+
 $this->registerJs("
 $(function() {
    $('#popupModal').click(function(e) {
@@ -89,5 +93,5 @@ $(function(){
 });
 
    ");
-
+#-----------------------------------------------------------------------#
 ?>

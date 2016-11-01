@@ -25,9 +25,16 @@ use kartik\date\DatePicker;
   	 if($customer->customer_type == 'Commercial'){
        $company = Companies::findOne(['customer_id'=>Estimates::FindEstimateSql($model->estimate_id)[0]['customer_id']]);
        $company_location = CompanyLocations::findOne(['company_location_id'=>Estimates::FindEstimateSql($model->estimate_id)[0]['c_id']]);
+       
 
     }
-  }
+    
+  }else{
+      //initialized  number properties of the estimate model to reduce error
+       $model->tax = 0;
+       $model->discount = 0;
+       $model->factor = 0;
+    }
 
   
 ?>
@@ -86,10 +93,10 @@ use kartik\date\DatePicker;
              <div class="col-md-3">
             	<?= $form->field($model, 'recurring_value')->dropDownList(
 					 [
-					  'W'=>'Week',
-					  'M'=>'Month',
+					  'W'=>'Weekly',
+					  'M'=>'Monthly',
 					 ],
-					 ['prompt'=>'-Repeat every-'],
+					 ['prompt'=>'None'],
 					 ['class'=>'form-control inline-block']
 					 )->label('Repeat')
 				?>
@@ -118,7 +125,7 @@ use kartik\date\DatePicker;
              <?= $form->field($model, "discount")->textInput(['type' => 'number'])->label('Discount') ?>
              </div>
              <div class="col-md-4">
-             <?= $form->field($model, "factor")->textInput(['type' => 'number'])->label('Multiplier') ?>
+             <?= $form->field($model, "factor")->textInput(['type' => 'number',])->label('Multiplier') ?>
              </div>
          </div>
    </div >
@@ -139,5 +146,108 @@ $this->registerCss("
 	}
  ");
 
+
+?>
+
+<?php
+$script = "$(function(){
+  $.post('index.php?r=companies/companies&id='+ $('#cust_id').val(), function( data ) {
+    $( 'select#companies-company_id' ).html(data);
+  });
+});
+
+$(function(){
+   
+$('select#companylocations-company_location_id').attr('disabled',true);
+	$('select#companies-company_id').change(function () {
+		if ($(this).val() > 0) {
+			$('select#companylocations-company_location_id').attr('disabled',false);
+		}
+		else{
+			$('select#companylocations-company_location_id').attr('disabled',true);
+		}
+	});
+});
+
+
+//Keeps track of the indice in the estimate form
+$(function(){
+    var serivce_index=0;
+    var area_index = 0;
+    var product_index = 0;
+    /*
+        Trigger when the an service dynamic field is added.
+        Increment the index number and popular the product dropdown;
+    */
+     $('.service_form_wrappper').on('afterInsert', function(e, item) {
+        serivce_index++;
+        $('select#productservices-'+serivce_index+'-service_id').change(function(){
+             
+                  $.post('index.php?r=estimates/find-product-by-service&id='+$(this).val(), function( data ) {
+                      $( 'select#productsusedperarea-'+serivce_index+'-'+area_index+'-0-product_id' ).html( data );});
+          });
+                /*
+                    Trigger when the an area dynamic field is added.
+                    Increment the index number and popular the product dropdown;
+                */
+                $('.area_form_wrapper').on('afterInsert', function(e, item) {
+                    area_index++;
+                   $.post('index.php?r=estimates/find-product-by-service&id='+$('select#productservices-'+serivce_index+'-service_id').val(), function( data ) {
+                         $( 'select#productsusedperarea-'+serivce_index+'-'+area_index+'-0-product_id').html( data );
+                   });
+
+                   
+                   
+                }); 
+
+                /*
+                    Trigger when the an product dynamic field is added.
+                    Increment the index number and popular the product dropdown;
+                */
+               $('.product_form_wrapper').on('afterInsert', function(e, item) {
+                    product_index++;
+                    console.log('select#productsusedperarea-'+serivce_index+'-'+area_index+'-'+product_index+'-product_id');
+                       $.post('index.php?r=estimates/find-product-by-service&id='+$('select#productservices-'+serivce_index+'-service_id').val(), function( data ) {
+                         $( 'select#productsusedperarea-'+serivce_index+'-'+area_index+'-'+product_index+'-product_id').html( data );
+                   });
+
+                }); 
+
+                    /*
+                        Trigger when the a product dynamic field is removed.
+                        Reorder the product index number 
+                   */
+                    $('.product_form_wrapper').on('afterDelete', function(e) {
+                        console.log('Deleted item!');
+                        product_index--;
+                    });
+                    
+                   /*
+                        Trigger when the an area dynamic field is removed.
+                        Reorder the area index number 
+                    */
+                   $('.area_form_wrapper').on('afterDelete', function(e) {
+                        console.log('Area Deleted item!');
+                        area_index--;
+                    });
+            /*
+                Trigger when the a service dynamic field is removed.
+                Reorder the service index number 
+            */
+             $('.service_form_wrappper').on('afterDelete', function(e) {
+                    console.log('Service Deleted item!');
+                    service_index--;
+              });
+
+    });
+
+
+});
+"
+
+
+;
+
+$this->registerJs($script);
 
 ?>

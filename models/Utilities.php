@@ -20,13 +20,14 @@ class Utilities
 		//accesing months
 		switch($type){
 			case 1:
-			$months = $diff34->m;
-	        $result = $months;
-            break;
-            case 2:
-	        $days = floor($diff34->days/7);
-	        $result = $days;
+		        $days = floor($diff34->days/7);
+		        $result = $days;
 	        break;
+			case 2:
+				$months = $diff34->m;
+		        $result = $months;
+            break;
+            
         }
 	 
        return $result;

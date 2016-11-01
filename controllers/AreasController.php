@@ -36,7 +36,7 @@ class AreasController extends Controller
      * Lists all Areas models.
      * @return mixed
      */
-    public function actionIndex($id=1)
+    public function actionIndex($id=1, $type=1)
     {
         $searchModel = new AreasSearch();
        
@@ -59,14 +59,26 @@ class AreasController extends Controller
            echo $out;
            return;
        }
+       if($type == 1){
+         $dataProvider = new ActiveDataProvider([
+              'query' => Areas::find()->where(['company_location_id'=>$id]),
+              'pagination' => [
+                  'pageSize' => 10,
+              ],
+              
+          ]);
+       }
+       else{
+         $dataProvider = new ActiveDataProvider([
+              'query' => Areas::find()->where(['customer_id'=>$id]),
+              'pagination' => [
+                  'pageSize' => 10,
+              ],
+              
+          ]);
+       }
 
-       $dataProvider = new ActiveDataProvider([
-            'query' => Areas::find()->where(['company_location_id'=>$id]),
-            'pagination' => [
-                'pageSize' => 10,
-            ],
-            
-        ]);
+     
        /*$dataProvider = new ArrayDataProvider([
             'allModels' => Areas::findAll(['company_location_id'=>$id]),
             'pagination' => [
@@ -319,7 +331,7 @@ class AreasController extends Controller
 
                   
                         foreach ($area_units as $i => $area_unit) {
-                           $area_unit->area_id = $id;
+                           $area_unit->area_id = (int)$id;
                           
                             if (!($flag = $area_unit->save())) {
                                 $transaction->rollBack();
@@ -342,7 +354,7 @@ class AreasController extends Controller
         }
         else{
            
-            return $this->renderAjax('area-unit-form', [
+            return $this->render('area-unit-form', [
                    'area_units'=>(empty($area_units)) ? [new AreaUnits] : $area_units,
                 
             ]);

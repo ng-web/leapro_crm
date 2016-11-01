@@ -174,7 +174,7 @@ class EstimatesSearch extends Estimates
     }
     public function searchJobOrders($params)
     {
-       $jobOrdersQuery    =Estimates::Find()->where(['status_id'=>3]);
+       $jobOrdersQuery    =Estimates::Find()->where(['status_id'=>3])->orderBy('estimate_id','ASC');
 
         // add conditions that should always apply here
 

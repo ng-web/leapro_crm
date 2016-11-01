@@ -25,6 +25,14 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'product_quantity') ?>
 
+    <?php // echo $form->field($model, 'ingredients') ?>
+
+    <?php // echo $form->field($model, 'dilution') ?>
+
+    <?php // echo $form->field($model, 'application') ?>
+
+    <?php // echo $form->field($model, 'service_id') ?>
+
     <div class="form-group">
         <?= Html::submitButton('Search', ['class' => 'btn btn-primary']) ?>
         <?= Html::resetButton('Reset', ['class' => 'btn btn-default']) ?>
