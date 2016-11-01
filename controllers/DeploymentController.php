@@ -78,6 +78,16 @@ class DeploymentController extends Controller
         }
     }
 
+   public function actionDeployEquipment($id=0)//estimated area id
+   {
+        
+        $equipments= \Yii::$app->db->createCommand("SELECT * FROM `deployments` d right join  equipment e on 
+                                    d.equipment_id = e.equipment_id ")->queryAll();
+
+        return $this->render('deploy', [
+                'equipments' => $equipments,
+        ]);
+   }
      public function actionCreateByEstimate($id)
     {
         $model = new Deployments();
