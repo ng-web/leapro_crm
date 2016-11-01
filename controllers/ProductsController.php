@@ -3,13 +3,12 @@
 namespace app\controllers;
 
 use Yii;
-use yii\data\ArrayDataProvider;
 use app\models\Products;
 use app\models\ProductsSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
-
+use yii\helpers\json;
 /**
  * ProductsController implements the CRUD actions for Products model.
  */
@@ -34,24 +33,35 @@ class ProductsController extends Controller
      * Lists all Products models.
      * @return mixed
      */
-    public function actionIndex($id)
+    public function actionIndex()
     {
         $searchModel = new ProductsSearch();
-       
-        $dataProvider = new ArrayDataProvider([
-            'allModels' => Products::FindProductSql($id),
-            'pagination' => [
-                'pageSize' => 10,
-            ],
-            'sort' => [
-                'attributes' => ['product_id'],
-            ],
-        ]);
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+
+        //update products via editaable column
+        if(Yii::$app->request->post('hasEditable')){
+          
+
+           $product_id = Yii::$app->request->post('editableKey');
+           $product = Products::FindOne($product_id);
+          
+           $out = Json::encode(['output'=>'', 'message'=>'']);
+           $post = [];
+           $posted = current($_POST['Products']);
+           $post['Products'] = $posted;
+           
+    
+           if($product->load($post)){
+             $product->save();
+           }
+           echo $out;
+           return;
+       }
+
         return $this->render('index', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
         ]);
-
     }
 
     /**
@@ -76,7 +86,7 @@ class ProductsController extends Controller
         $model = new Products();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['index']);
+            return;
         } else {
             return $this->renderAjax('create', [
                 'model' => $model,
@@ -95,7 +105,7 @@ class ProductsController extends Controller
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['index']);
+            return $this->redirect(['view', 'id' => $model->product_id]);
         } else {
             return $this->renderAjax('update', [
                 'model' => $model,
@@ -116,24 +126,6 @@ class ProductsController extends Controller
         return $this->redirect(['index']);
     }
 
-	public function actionCost($id)
-    {
-		$countPosts = Products::find()
-                      ->where(['product_id' => $id])->count();
- 
-        $cost= Products::find()
-				->select(['product_cost'])
-				->where(['product_id'=>$id])->one();
-        
-       if($countPosts>0){
-            
-                   echo $cost->product_cost;
-
-        }
-        else{
-            echo "<option>-</option>";
-        }
-    }
     /**
      * Finds the Products model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
