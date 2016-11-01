@@ -62,6 +62,10 @@ class Customers extends \yii\db\ActiveRecord
         return $this->hasMany(Companies::className(), ['customer_id' => 'customer_id']);
     }
 	
+     public function getAreas()
+    {
+        return $this->hasMany(Areas::className(), ['customer_id' => 'customer_id']);
+    }
 	public function getFullName(){
 		return $this->customer_firstname .' '.$this->customer_lastname;
 	}
@@ -105,6 +109,27 @@ class Customers extends \yii\db\ActiveRecord
             left JOIN estimate_status s on s.status_id = es.status_id
             where companies.customer_id = :id and es.status_id = 3
             group by es.estimate_id order by es.estimate_id desc';
+    }
+
+    public static function FindAllJobsSql()
+    {
+        return 'SELECT customers.customer_id, company_locations.company_location_id as `c_id`,
+            company_name as `name`, customers.customer_type,es.status_id, es.expiry_date, tax, a.area_name, ea.estimate_id, 
+            es.received_date, address_line1, address_line2, address_province, schedule_date_time FROM companies left JOIN 
+            company_locations on company_locations.company_id = companies.company_id left JOIN customers on 
+            customers.customer_id = companies.customer_id left JOIN areas a on a.company_location_id = 
+            company_locations.company_location_id left JOIN estimated_areas ea on ea.area_id = a.area_id 
+            left join estimates es on ea.estimate_id = es.estimate_id left JOIN addresses on 
+            company_locations.address_id = addresses.address_id left JOIN estimate_status s on
+             s.status_id = es.status_id where es.status_id = :s_id and schedule_date_time > TIMESTAMPADD(DAY,1,Now())
+            union             
+            SELECT customers.customer_id, customers.address_id as `c_id`, concat(customers.customer_firstname," ", customers.customer_lastname) as `name`, customers.customer_type,es.status_id, es.expiry_date, tax, a.area_name, ea.estimate_id, 
+            es.received_date, address_line1, address_line2, address_province, schedule_date_time  from customers
+            left JOIN areas a on a.customer_id = 
+            customers.customer_id left JOIN estimated_areas ea on ea.area_id = a.area_id 
+            left join estimates es on ea.estimate_id = es.estimate_id left JOIN addresses on 
+            customers.address_id = addresses.address_id left JOIN estimate_status s on
+             s.status_id = es.status_id where  es.status_id = :s_id and schedule_date_time > TIMESTAMPADD(DAY,1,Now())';
     }
 
     public static function FindAllCompanySql()
