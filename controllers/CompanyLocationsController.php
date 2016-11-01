@@ -5,11 +5,14 @@ namespace app\controllers;
 use Yii;
 use app\models\CompanyLocations;
 use app\models\Addresses;
+use app\models\Areas;
 use app\models\CompanyLocationsSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\db\Query;
 use yii\filters\VerbFilter;
+use yii\data\ArrayDataProvider;
+use yii\data\ActiveDataProvider;
 
 /**
  * CompanyLocationsController implements the CRUD actions for CompanyLocations model.
@@ -39,10 +42,17 @@ class CompanyLocationsController extends Controller
     {
         $searchModel = new CompanyLocationsSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
-
+          $residentialDataProvider = new ActiveDataProvider([
+            'query' => Areas::find()->where(['company_location_id' => null]),
+            'pagination' => [
+                'pageSize' => 10,
+            ],
+            
+        ]);
         return $this->render('index', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
+            'residentialDataProvider' => $residentialDataProvider
         ]);
     }
 
