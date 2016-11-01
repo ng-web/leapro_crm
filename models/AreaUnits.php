@@ -34,7 +34,7 @@ class AreaUnits extends \yii\db\ActiveRecord
             [['area_id', 'unit_id'], 'integer'],
             [['value'], 'number'],
             [['area_id', 'unit_id'], 'required'],
-            [['unit_id',], 'unique','targetAttribute' => ['unit_id'],'message' => 'Units must be unique.'],
+          //  [['unit_id',], 'unique','targetAttribute' => ['unit_id'],'message' => 'Units must be unique.'],
             [['area_id'], 'exist', 'skipOnError' => true, 'targetClass' => Areas::className(), 'targetAttribute' => ['area_id' => 'area_id']],
             [['unit_id'], 'exist', 'skipOnError' => true, 'targetClass' => Units::className(), 'targetAttribute' => ['unit_id' => 'unit_id']],
         ];
