@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <?=$this->title = ''?>
 
 <div class="row">
@@ -118,4 +119,6 @@
         ]);
         ?>
    </div>
+<<<<<<< HEAD
 </div>
+
