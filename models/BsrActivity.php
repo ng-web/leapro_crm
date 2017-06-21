@@ -34,12 +34,12 @@ class BsrActivity extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['bs_status', 'bs_condition', 'equipment_id'], 'required'],
+            [['bs_status', 'bs_condition', 'equipment_id', 'bsr_id'], 'required'],
             [['bs_status', 'bs_qty', 'weight', 'number_seen', 'employee_id', 'bs_condition', 'equipment_id', 'bsr_id'], 'integer'],
             [['bs_comments'], 'string'],
-            [['bsr_id'], 'exist', 'skipOnError' => true, 'targetClass' => BsrHeader::className(), 'targetAttribute' => ['bsr_id' => 'id']],
             [['employee_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employees::className(), 'targetAttribute' => ['employee_id' => 'emp_no']],
             [['equipment_id'], 'exist', 'skipOnError' => true, 'targetClass' => Equipment::className(), 'targetAttribute' => ['equipment_id' => 'equipment_id']],
+            [['bsr_id'], 'exist', 'skipOnError' => true, 'targetClass' => BsrHeader::className(), 'targetAttribute' => ['bsr_id' => 'id']],
         ];
     }
 

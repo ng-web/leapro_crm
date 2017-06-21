@@ -46,7 +46,9 @@ $config = [
                 ],
             ],
         ],
-       
+        'authManager' => [
+            'class' => 'yii\rbac\DbManager',
+        ],
         'db' => require(__DIR__ . '/db.php'),
         /*
         'urlManager' => [
@@ -65,7 +67,34 @@ $config = [
                     // message source
                     // 'downloadAction' => 'gridview/export/download',
                     // 'i18n' => []
-                ]
+                ],
+                'user' => [
+                    'class' => 'dektrium\user\Module',
+                    'enableUnconfirmedLogin' => true,
+                    'confirmWithin' => 21600,
+                    'cost' => 12,
+                    //'admins' => ['admin']
+                    'modelMap' => [
+                      'RegistrationForm' => 'app\models\RegistrationForm',
+                      'User' => 'app\models\User',
+                    ]
+                ],
+                'admin' => [
+                   'class' => 'mdm\admin\Module',
+                   'layout' => 'left-menu',
+                   'controllerMap' => [
+                        'assignment' => [
+                           'class' => 'mdm\admin\controllers\AssignmentController',
+                           'userClassName' => 'dektrium\user\models\User',
+                           //เรียกใช้โมเดล user ของ dektrium
+                       ]
+                   ],
+               ],
+
+                'redactor' => 'yii\redactor\RedactorModule',
+                'class' => 'yii\redactor\RedactorModule',
+                'uploadDir' => '@webroot/uploads',
+                'uploadUrl' => '/hello/uploads',
             ],
     'params' => $params,
 ];

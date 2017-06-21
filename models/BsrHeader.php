@@ -13,6 +13,7 @@ use Yii;
  * @property string $bsr_verifiedby
  * @property string $bsr_date
  * @property integer $emp_id
+ * @property integer $estimated_area_id
  */
 class BsrHeader extends \yii\db\ActiveRecord
 {
@@ -36,9 +37,10 @@ class BsrHeader extends \yii\db\ActiveRecord
             [['bsr_docnum'], 'string', 'max' => 32],
             [['bsr_approvedby', 'bsr_verifiedby'], 'string', 'max' => 70],
             [['emp_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employees::className(), 'targetAttribute' => ['emp_id' => 'emp_no']],
+            [['estimated_area_id'], 'exist', 'skipOnError' => true, 'targetClass' => EstimatedAreas::className(), 'targetAttribute' => ['estimated_area_id' => 'estimated_area_id']],
         ];
     }
-  
+
     /**
      * @inheritdoc
      */
@@ -50,13 +52,8 @@ class BsrHeader extends \yii\db\ActiveRecord
             'bsr_approvedby' => 'Bsr Approvedby',
             'bsr_verifiedby' => 'Bsr Verifiedby',
             'bsr_date' => 'Bsr Date',
-            'estimated_area_id' => 'Estimate Area',
             'emp_id' => 'Emp ID',
+            'estimated_area_id' => 'Estimated Area ID',
         ];
-    }
-
-     public function getEstimatedArea()
-    {
-        return $this->hasOne(EstimatedAreas::className(), ['estimated_area_id' => 'estimated_area_id']);
     }
 }
